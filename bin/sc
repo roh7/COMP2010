@@ -1,0 +1,4 @@
+#!/bin/bash
+BINDIR="$( cd "$( dirname "$0" )" && pwd )"
+DIR=`dirname $BINDIR`
+java -cp $DIR/bin:$DIR/lib/java-cup-11b-runtime.jar SC $1
