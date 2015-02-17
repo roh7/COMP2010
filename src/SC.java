@@ -6,8 +6,8 @@ import java.io.StringReader;
 import java_cup.runtime.*;
 
 class SC {
-    public static void main(String[] args) {
-    	Lexer lexer;
+	public static void main(String[] args) {
+		Lexer lexer;
 		try {
 			lexer = new Lexer(new FileReader(args[0]));
 			try {
@@ -16,8 +16,7 @@ class SC {
 				if(!parser.syntaxErrors){
 					System.out.println("parsing successful");
 				}
-				
-				
+
 			} catch (Exception e) {
 				// Commented out because this output is uniformative.  ETB
 				//e.printStackTrace();
@@ -26,5 +25,5 @@ class SC {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-    }
+	}
 }

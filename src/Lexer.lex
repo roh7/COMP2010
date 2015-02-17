@@ -69,6 +69,7 @@ STR_LIT     = "\"" ~"\""
 "string"    { return sym(Sym.STR); }
 "list"      { return sym(Sym.LIST); }
 "void"      { return sym(Sym.VOID); }
+//"top"      { return sym(Sym.TOP); }
 
 //Aggregate operators
 "in"        { return sym(Sym.IN); }
@@ -96,6 +97,16 @@ STR_LIT     = "\"" ~"\""
 //Logical operators
 "!"         { return sym(Sym.NOT); }
 "&&"        { return sym(Sym.AND); }
+"||"        { return sym(Sym.OR); }
+"=>"        { return sym(Sym.IMPLY); }
+
+//Relational operators
+"<"         { return sym(Sym.LTHAN); }
+"<="        { return sym(Sym.LTHANEQ); }
+"=="        { return sym(Sym.EQUALS); }
+"!="        { return sym(Sym.NEQUALS); }
+//">"         { return sym(Sym.MTHAN); }
+//">="        { return sym(Sym.MTHANEQ); }
 
 //Arithmetic operators
 "+"         { return sym(Sym.PLUS); }
@@ -104,3 +115,25 @@ STR_LIT     = "\"" ~"\""
 "/"         { return sym(Sym.DIV); }
 "^"         { return sym(Sym.POW); }
 
+//Other
+"("         { return sym(Sym.LPAREN); }
+")"         { return sym(Sym.RPAREN); }
+"{"         { return sym(Sym.LBRACE); }
+"}"         { return sym(Sym.RBRACE); }
+"[|"        { return sym(Sym.LDICT); }
+"|]"        { return sym(Sym.RDICT); }
+"["         { return sym(Sym.LBRACK); }
+"]"         { return sym(Sym.RBRACK); }
+","         { return sym(Sym.COMMA); }
+":"         { return sym(Sym.COL); }
+";"         { return sym(Sym.SEMICOL); }
+"main"      { return sym(Sym.MAIN); }
+
+//Literals
+{CHAR_LIT}  { return sym(Sym.CHAR_LIT); }
+{BOOL_LIT}  { return sym(Sym.BOOL_LIT); }
+{FLOAT_LIT} { return sym(Sym.FLOAT_LIT); }
+{INT_LIT}   { return sym(Sym.INT_LIT); }
+{STR_LIT}   { return sym(Sym.STR_LIT); }
+{IDENTIFIER}{ return sym(Sym.ID); }
+.           { /*System.out.println ("<ERROR>");*/ error(); } // For any other symbols, print error.
