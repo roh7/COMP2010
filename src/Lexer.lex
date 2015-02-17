@@ -45,11 +45,12 @@ PUNCTUATION = [\.,-\/#!$%\^&\*;:{}=\-_`~()]
 NUM_NO_ZERO = [1-9][0-9]* // Cannot start with 0.
 
 /* Literals macros. */
-IDENTIFIER  = {LETTER}({LETTER}|{DIGIT})*
+IDENTIFIER  = {LETTER}({LETTER}|{DIGIT}|"_")*
 CHAR_LIT    = "'"({LETTER}|{DIGIT}|{PUNCTUATION})"'"
-BOOL_LIT    = ("true"|"false")
+BOOL_LIT    = ("T"|"F")
 INT_LIT     = 0|-?{NUM_NO_ZERO}
-FLOAT_LIT   = -?{DIGIT}+"."{DIGIT}*
+FLOAT_LIT   = -?{DIGIT}+"."{DIGIT}+
+RAT_LIT     = (INT_LIT"_")?INT_LIT"/"INT_LIT
 STR_LIT     = "\"" ~"\""
 
 %%
