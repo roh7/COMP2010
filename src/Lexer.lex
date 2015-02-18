@@ -70,7 +70,7 @@ STR_LIT     = "\"" ~"\""
 "string"    { return sym(Sym.STR); }
 "list"      { return sym(Sym.LIST); }
 "void"      { return sym(Sym.VOID); }
-//"top"      { return sym(Sym.TOP); }
+"top"      { return sym(Sym.TOP); }
 
 //Aggregate operators
 "in"        { return sym(Sym.IN); }
@@ -115,6 +115,10 @@ STR_LIT     = "\"" ~"\""
 "*"         { return sym(Sym.TIMES); }
 "/"         { return sym(Sym.DIV); }
 "^"         { return sym(Sym.POW); }
+
+//Expression operators
+//"."			{ return sym(Sym.DOT); } //not sure about this
+":=" 		{ return sym(Sym.ASSIGN); }
 
 //Other
 "("         { return sym(Sym.LPAREN); }

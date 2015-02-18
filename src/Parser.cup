@@ -1,0 +1,61 @@
+package Q;
+
+import java_cup.runtime.*;
+
+parser code
+{:
+    public void report_error(String message, Object info) {
+    
+        StringBuffer err = new StringBuffer("Error in line ");
+        java_cup.runtime.Symbol s = (java_cup.runtime.Symbol)info;
+        err.append((s.left) + ": ");
+        System.err.print(err);
+    }
+    
+    public void report_fatal_error(String message, Object info) {
+        report_error(message, info);
+        System.exit(1);
+    }
+:}
+
+action code
+{:
+:}
+
+//Types
+terminal        CHAR, BOOL, INT, RAT, FLOAT, DICT, STR, LIST, VOID, TOP;
+
+//Aggregate operators
+terminal        IN, LEN, CONCAT;
+
+//Definitions/Declarations
+terminal        TDEF, FDEF;
+
+//Input/Output operators
+terminal        READ, PRINT;
+
+// Control flow operators
+terminal        IF, ELSE, WHILE, DO, FORALL, RET;
+
+//Logical operators
+terminal        NOT, AND, OR, IMPLY;
+
+//Relational operators
+terminal        LTHAN, LTHANEQ, EQUALS, NEQUALS /*,MTHAN, MTHANEQ*/;
+
+//Arithmetic operators
+terminal        PLUS, MINUS, TIMES, DIV, POW;
+
+//Expression operators
+terminal        /*DOT ,*/ ASSIGN;
+
+//Other tokens
+terminal        LPAR, RPAR, LBRACE, RBRACE, LBRACK, RBRACK, LDICT, RDICT, COMMA, COL, SEMICOL, MAIN;
+
+//Loop terminators
+terminal        ENDIF, ENDDO;
+
+/* Literals. */
+terminal        ID, CHAR_LIT, BOOL_LIT, INT_LIT, FLOAT_LIT, STR_LIT;
+
+
