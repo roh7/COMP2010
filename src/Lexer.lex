@@ -106,8 +106,8 @@ STR_LIT     = "\"" ~"\""
 "<="        { return sym(Sym.LTHANEQ); }
 "=="        { return sym(Sym.EQUALS); }
 "!="        { return sym(Sym.NEQUALS); }
-//">"         { return sym(Sym.MTHAN); }
-//">="        { return sym(Sym.MTHANEQ); }
+//">"         { return sym(Sym.MTHAN); } //not sure about this
+//">="        { return sym(Sym.MTHANEQ); } //not sure about this
 
 //Arithmetic operators
 "+"         { return sym(Sym.PLUS); }
@@ -129,6 +129,10 @@ STR_LIT     = "\"" ~"\""
 ":"         { return sym(Sym.COL); }
 ";"         { return sym(Sym.SEMICOL); }
 "main"      { return sym(Sym.MAIN); }
+
+//Loop terminators
+"fi"        { return syn(Sym.ENDIF); }
+"od"        { return syn(Sym.ENDDO); }
 
 //Literals
 {CHAR_LIT}  { return sym(Sym.CHAR_LIT); }
