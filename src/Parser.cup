@@ -25,7 +25,7 @@ action code
 //=====================================================================================================================
 
 //Types
-terminal        CHAR, BOOL, INT, RAT, FLOAT, DICT, STR, LIST, VOID, TOP;
+terminal        CHAR, BOOL, INT, RAT, FLOAT, DICT, SEQ, TOP, VOID;
 
 //Aggregate operators
 terminal        IN, LEN, CONCAT;
@@ -49,10 +49,10 @@ terminal        LTHAN, LTHANEQ, EQUALS, NEQUALS /*,MTHAN, MTHANEQ*/;
 terminal        PLUS, MINUS, TIMES, DIV, POW;
 
 //Expression operators
-terminal        /*DOT ,*/ ASSIGN;
+terminal        DOT , ASSIGN;
 
 //Other tokens
-terminal        LANGBR, RANGBR, LPAR, RPAR, LBRACE, RBRACE, LBRACK, RBRACK, LDICT, RDICT, COMMA, COL, SEMICOL, MAIN;
+terminal        LANGBR, RANGBR, LPAREN, RPAREN, LBRACE, RBRACE, LBRACK, RBRACK, LDICT, RDICT, COMMA, COL, SEMICOL, MAIN;
 
 //Loop terminators
 terminal        ENDIF, ENDDO;
@@ -72,11 +72,11 @@ precedence left         PLUS, MINUS, TIMES, DIV, AND, CONCAT;
 //Productions
 start with program;
 
-program     ::= glob_decl_list main_func {: System.out.println("Parsing successful."); :}
-              | main_func glob_decl_list {: System.out.println("Parsing successful."); :}
-              | glob_decl_list main_func glob_decl_list {: System.out.println("Parsing successful."); :}
-              | main_func {: System.out.println("Parsing successful."); :}
-              ;
+program         ::= glob_decl_list main_func {: System.out.println("Parsing successful."); :}
+                  | main_func glob_decl_list {: System.out.println("Parsing successful."); :}
+                  | glob_decl_list main_func glob_decl_list {: System.out.println("Parsing successful."); :}
+                  | main_func {: System.out.println("Parsing successful."); :}
+                  ;
 
 glob_decl_list  ::= glob_decl_list glob_decl
                   | glob_decl
@@ -88,4 +88,119 @@ glob_decl       ::= var_decl_part
 main_func       ::= VOID MAIN block;
 
 //=====================================================================================================================
+
+type            ::= CHAR | BOOL | INT | RAT | FLOAT | DICT | SEQ | TOP;
+literal         ::= CHAR_LIT | BOOL_LIT | INT_LIT | FLOAT_LIT | RAT_LIT | dict_lit | sequence;
+sequence        ::= STR_LIT
+                  | list_lit
+                  ;
+
+accessor        ::= ID
+                  | accessor DOT ID
+                  ;
+                  
+list_lit        ::= LBRACK comma_list RBRACK;
+comma_list      ::= expr
+                  | expr COMMA comma_list
+                  |
+                  ;
+                  
+dict_lit        ::= LDICT dict_comma_list RDICT;
+dict_comma_list ::= dict_pair
+                  | dict_pair COMMA dict_comma_list
+                  |
+                  ;
+dict_pair       ::= literal COL literal;
+
+func_def        ::= DEF type ID LPAR param_list RPAR block;
+data_def        ::= TDEF ID COL data_list SEMICOL;
+data_list       ::= ID COL type
+                  | ID COL type COMMA data_list
+                  |
+                  ;
+                  
+param_list      ::= type ID
+                  | type ID COMMA param_list
+                  |
+                  ;
+
+block           ::= LBRACE var_decl_list stat_list RBRACE 
+                  | LBRACE stat_list RBRACE
+                  | LBRACE RBRACE
+                  ;
+                  
+var_decl_list   ::= var_decl_list var_decl_part
+                  | var_decl_part
+                  ;
+var_decl_part   ::= var_decl SEMICOL;
+var_decl        ::= type ID
+                  | type assign_stat
+                  /* | error assign_stat {: System.err.println("Expected rule 'var_decl'."); :} */
+                  ;
+
+//=====================================================================================================================
+
+//Rules for statements
+
+stat_list       ::= stat_list stat_part
+                  | stat_part;
+                  
+stat_part       ::= stat SEMICOL
+                  | if_else
+                  | while_do
+                  | for_each
+                  ;
+
+stat            ::= assign_stat
+                  | io_stat
+                  | func_call
+                  | ret_expr
+                  ;
+assign_stat     ::= accessor ASSIGN assign_stat
+                  | accessor ASSIGN expr_list
+                  | elem_access ASSIGN expr
+                  ;
+io_stat         ::= READ accessor
+                  | PRINT expr_list
+                  ;
+func_call       ::= ID LPAR expr_list RPAR;
+if_else         ::= IF LPAR expr RPAR block ELSE block
+                  ;
+while_do        ::= WHILE LPAR expr RPAR DO block ENDDO;
+for_each        ::= FOREACH LPAR ID COL ID RPAR block; //check
+ret_expr        ::= RET expr
+                  | RET;
+elem_access     ::= ID LBRACK expr RBRACK;
+
+len_expr        ::= LEN LPAR ID RPAR;
+seq_slice       ::= ID LBRACK INT_LIT COL INT_LIT RBRACK    
+                  | ID LBRACK COL INT_LIT RBRACK
+                  | ID LBRACK INT_LIT COL RBRACK
+                  ;
+expr_list       ::= expr
+                  | expr COMMA expr_list
+                  |
+                  ;               
+
+expr            ::= expr TIMES expr
+                  | expr PLUS expr
+                  | expr MINUS expr
+                  | expr DIV expr
+                  | expr POW expr
+                  | NOT expr
+                  | expr AND expr
+                  | expr LTHAN expr
+                  | expr LTHANEQ expr
+                  | expr EQUALS expr
+                  | expr NEQUALS expr
+                  | expr CONCAT expr
+                  | expr IN expr
+                  | LPAR expr RPAR
+                  | elem_access
+                  | func_call
+                  | len_expr
+                  | seq_slice
+                  | accessor
+                  | literal
+                  ;
 

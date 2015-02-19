@@ -62,17 +62,18 @@ STR_LIT     = "\"" ~"\""
 "#".*[\r|\n|\r\n]   {} /* Single-line comments */
 "/#"~ "#/"          {} /* Multi-line comments */
 
-//Types
+//Primitives
 "char"      { return sym(Sym.CHAR); }
 "bool"      { return sym(Sym.BOOL); }
 "int"       { return sym(Sym.INT); }
 "rat"       { return sym(Sym.RAT); }
 "float"     { return sym(Sym.FLOAT); }
-"dict"      { return sym(Sym.DICT); }
-"string"    { return sym(Sym.STR); }
-"list"      { return sym(Sym.LIST); }
-"void"      { return sym(Sym.VOID); }
 "top"       { return sym(Sym.TOP); }
+"void"		{ return sym(Sym.VOID); }
+
+//Aggregates
+"dict"      { return sym(Sym.DICT); }
+"seq"		{ return sym(Sym.SEQ); }
 
 //Aggregate operators
 "in"        { return sym(Sym.IN); }
@@ -119,7 +120,7 @@ STR_LIT     = "\"" ~"\""
 "^"         { return sym(Sym.POW); }
 
 //Expression operators
-//"."			{ return sym(Sym.DOT); } //not sure about this
+"."			{ return sym(Sym.DOT); } //not sure about this
 ":=" 		{ return sym(Sym.ASSIGN); }
 
 //Other
@@ -129,10 +130,10 @@ STR_LIT     = "\"" ~"\""
 ")"         { return sym(Sym.RPAREN); }
 "{"         { return sym(Sym.LBRACE); }
 "}"         { return sym(Sym.RBRACE); }
-"[|"        { return sym(Sym.LDICT); }
-"|]"        { return sym(Sym.RDICT); }
 "["         { return sym(Sym.LBRACK); }
 "]"         { return sym(Sym.RBRACK); }
+"[|"        { return sym(Sym.LDICT); }
+"|]"        { return sym(Sym.RDICT); }
 ","         { return sym(Sym.COMMA); }
 ":"         { return sym(Sym.COL); }
 ";"         { return sym(Sym.SEMICOL); }
