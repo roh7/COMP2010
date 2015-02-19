@@ -22,6 +22,8 @@ action code
 {:
 :}
 
+//=====================================================================================================================
+
 //Types
 terminal        CHAR, BOOL, INT, RAT, FLOAT, DICT, STR, LIST, VOID, TOP;
 
@@ -50,12 +52,40 @@ terminal        PLUS, MINUS, TIMES, DIV, POW;
 terminal        /*DOT ,*/ ASSIGN;
 
 //Other tokens
-terminal        LPAR, RPAR, LBRACE, RBRACE, LBRACK, RBRACK, LDICT, RDICT, COMMA, COL, SEMICOL, MAIN;
+terminal        LANGBR, RANGBR, LPAR, RPAR, LBRACE, RBRACE, LBRACK, RBRACK, LDICT, RDICT, COMMA, COL, SEMICOL, MAIN;
 
 //Loop terminators
 terminal        ENDIF, ENDDO;
 
-/* Literals. */
+//Literals
 terminal        ID, CHAR_LIT, BOOL_LIT, INT_LIT, FLOAT_LIT, STR_LIT;
 
+//=====================================================================================================================
+
+//Operator precendence
+precedence nonassoc     NOT, LTHAN, LTHANEQ, EQUALS, NEQUALS;
+precedence right        POW, IN;
+precedence left         PLUS, MINUS, TIMES, DIV, AND, CONCAT;
+
+//=====================================================================================================================
+
+//Productions
+start with program;
+
+program     ::= glob_decl_list main_func {: System.out.println("Parsing successful."); :}
+              | main_func glob_decl_list {: System.out.println("Parsing successful."); :}
+              | glob_decl_list main_func glob_decl_list {: System.out.println("Parsing successful."); :}
+              | main_func {: System.out.println("Parsing successful."); :}
+              ;
+
+glob_decl_list  ::= glob_decl_list glob_decl
+                  | glob_decl
+                  ;
+glob_decl       ::= var_decl_part
+                  | func_def
+                  | data_def
+                  ;
+main_func       ::= VOID MAIN block;
+
+//=====================================================================================================================
 

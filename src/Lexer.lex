@@ -55,6 +55,8 @@ STR_LIT     = "\"" ~"\""
 
 %%
 
+//=====================================================================================================================
+
 //To be ignored
 {WHITESPACE}        {} /* Ignore extra whitespace */
 "#".*[\r|\n|\r\n]   {} /* Single-line comments */
@@ -70,7 +72,7 @@ STR_LIT     = "\"" ~"\""
 "string"    { return sym(Sym.STR); }
 "list"      { return sym(Sym.LIST); }
 "void"      { return sym(Sym.VOID); }
-"top"      { return sym(Sym.TOP); }
+"top"       { return sym(Sym.TOP); }
 
 //Aggregate operators
 "in"        { return sym(Sym.IN); }
@@ -121,6 +123,8 @@ STR_LIT     = "\"" ~"\""
 ":=" 		{ return sym(Sym.ASSIGN); }
 
 //Other
+"<"			{ return sym(Sym.LANGBR); }
+">"			{ return sym(Sym.RANGBR); }
 "("         { return sym(Sym.LPAREN); }
 ")"         { return sym(Sym.RPAREN); }
 "{"         { return sym(Sym.LBRACE); }
