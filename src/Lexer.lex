@@ -1,5 +1,6 @@
 //Lexer.lex
-//16/02/2014 - Rohan Kopparapu, Sam Fallahi, David Lipowicz
+//19/02/2014 - Rohan Kopparapu, Sam Fallahi, David Lipowicz
+//Notes - look at type aliasing
 
 import java_cup.runtime.*;
 import java.io.IOException;

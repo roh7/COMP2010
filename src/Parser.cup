@@ -1,4 +1,6 @@
-package Q;
+//Parser.cup
+//19/02/2014 - Rohan Kopparapu, Sam Fallahi, David Lipowicz
+//Notes - look at type aliasing
 
 import java_cup.runtime.*;
 
@@ -136,6 +138,7 @@ var_decl_part   ::= var_decl SEMICOL;
 var_decl        ::= type ID
                   | type assign_stat
                   /* | error assign_stat {: System.err.println("Expected rule 'var_decl'."); :} */
+                  | SEQ LANGBR type RANGBR /* seq<type>*/
                   ;
 
 //=====================================================================================================================
