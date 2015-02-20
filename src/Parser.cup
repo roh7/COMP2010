@@ -18,6 +18,15 @@ parser code
         report_error(message, info);
         System.exit(1);
     }
+
+    public void syntax_error(Symbol current_token)
+    {
+        report_error("Syntax error at line " + (current_token.left + 1) +
+            ", column " + current_token.right + "\n",  null);
+        syntaxErrors = true;
+    }
+
+    public boolean syntaxErrors = false;
 :}
 
 action code
@@ -39,7 +48,7 @@ terminal        TDEF, FDEF;
 terminal        READ, PRINT;
 
 // Control flow operators
-terminal        IF, ELSE, WHILE, DO, FORALL, RET;
+terminal        IF, THEN, ELSE, WHILE, DO, FORALL, RET;
 
 //Logical operators
 terminal        NOT, AND, OR, IMPLY;
@@ -54,13 +63,19 @@ terminal        PLUS, MINUS, TIMES, DIV, POW;
 terminal        DOT , ASSIGN;
 
 //Other tokens
-terminal        LANGBR, RANGBR, LPAREN, RPAREN, LBRACE, RBRACE, LBRACK, RBRACK, /*LDICT, RDICT,*/ COMMA, COL, SEMICOL, MAIN;
+terminal        RANGBR, LPAREN, RPAREN, LBRACE, RBRACE, LBRACK, RBRACK, /*LDICT, RDICT,*/ COMMA, COL, SEMICOL, MAIN;
 
 //Loop terminators
 terminal        ENDIF, ENDDO;
 
 //Literals
-terminal        ID, CHAR_LIT, BOOL_LIT, INT_LIT, FLOAT_LIT, STR_LIT;
+terminal        ID, CHAR_LIT, BOOL_LIT, INT_LIT, RAT_LIT, FLOAT_LIT, STR_LIT;
+
+non terminal program, glob_decl_list, glob_decl, main_func, type, aggreg, literal, sequence, accessor;
+non terminal list_lit, comma_list, dict_lit, dict_comma_list, dict_pair, func_def, data_def, data_list;
+non terminal param_list, block, var_decl_list, var_decl_part, var_decl, stat_list, stat_part, stat;
+non terminal assign_stat, io_stat, func_call, if_else, while_do, for_all;
+non terminal ret_expr, elem_access, len_expr, seq_slice, expr_list, expr;
 
 //=====================================================================================================================
 
@@ -115,7 +130,8 @@ dict_comma_list ::= dict_pair
                   ;
 dict_pair       ::= literal COL literal;
 
-func_def        ::= DEF type ID LPAR param_list RPAR block;
+// func_def        ::= FDEF type ID LPAREN param_list RPAREN block;
+func_def        ::= FDEF ID LPAREN param_list RPAREN COL type block;
 data_def        ::= TDEF ID COL data_list SEMICOL;
 data_list       ::= ID COL type
                   | ID COL type COMMA data_list
@@ -136,11 +152,13 @@ var_decl_list   ::= var_decl_list var_decl_part
                   | var_decl_part
                   ;
 var_decl_part   ::= var_decl SEMICOL;
-var_decl        ::= type ID
-                  | type assign_stat
+// var_decl        ::= type ID
+var_decl        ::= ID COL type
+                  // | type assign_stat
+                  | assign_stat COL type
                   /* | error assign_stat {: System.err.println("Expected rule 'var_decl'."); :} */
-                  | SEQ LANGBR type RANGBR /* seq<type>*/
-                  | DICT LANGBR type COMMA type RANGBR /* seq<type,type> */
+                  | SEQ LTHAN type RANGBR /* seq<type>*/
+                  | DICT LTHAN type COMMA type RANGBR /* seq<type,type> */
                   ;
 
 //=====================================================================================================================
@@ -153,7 +171,7 @@ stat_list       ::= stat_list stat_part
 stat_part       ::= stat SEMICOL
                   | if_else
                   | while_do
-                  | for_each
+                  | for_all
                   ;
 
 stat            ::= assign_stat
@@ -168,16 +186,26 @@ assign_stat     ::= accessor ASSIGN assign_stat
 io_stat         ::= READ accessor
                   | PRINT expr_list
                   ;
-func_call       ::= ID LPAR expr_list RPAR;
-if_else         ::= IF LPAR expr RPAR block ELSE block
+func_call       ::= ID LPAREN expr_list RPAREN;
+if_else         ::= IF LPAREN expr RPAREN THEN var_decl_list stat_list ELSE var_decl_list stat_list ENDIF
+                  | IF LPAREN expr RPAREN THEN var_decl_list stat_list ENDIF
                   ;
-while_do        ::= WHILE LPAR expr RPAR DO block ENDDO;
-for_each        ::= FOREACH LPAR ID COL ID RPAR block; //check
+// while_do        ::= WHILE LPAREN expr RPAREN DO block ENDDO; //check
+while_do        ::= WHILE LPAREN expr RPAREN DO var_decl_list stat_list ENDDO
+                  | WHILE LPAREN expr RPAREN DO stat_list ENDDO
+                  ;
+
+// for_all         ::= FORALL LPAREN ID COL ID RPAREN block; //check
+for_all         ::= FORALL LPAREN ID IN ID RPAREN DO var_decl_list stat_list ENDDO
+                  | FORALL LPAREN ID IN ID RPAREN DO stat_list ENDDO
+                  ;
+
+
 ret_expr        ::= RET expr
                   | RET;
 elem_access     ::= ID LBRACK expr RBRACK;
 
-len_expr        ::= LEN LPAR ID RPAR;
+len_expr        ::= LEN LPAREN ID RPAREN;
 seq_slice       ::= ID LBRACK INT_LIT COL INT_LIT RBRACK    
                   | ID LBRACK COL INT_LIT RBRACK
                   | ID LBRACK INT_LIT COL RBRACK
@@ -187,7 +215,7 @@ expr_list       ::= expr
                   |
                   ;               
 
-expr            ::= expr TIMES expr
+expr            ::= expr TIMES expr //needs an OR used somewhere and IMPLIES
                   | expr PLUS expr
                   | expr MINUS expr
                   | expr DIV expr
@@ -200,7 +228,7 @@ expr            ::= expr TIMES expr
                   | expr NEQUALS expr
                   | expr CONCAT expr
                   | expr IN expr
-                  | LPAR expr RPAR
+                  | LPAREN expr RPAREN
                   | elem_access
                   | func_call
                   | len_expr

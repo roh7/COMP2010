@@ -1,43 +1,30 @@
-//Lexer.lex
-//19/02/2014 - Rohan Kopparapu, Sam Fallahi, David Lipowicz
-//Notes - look at type aliasing
+//not finished yet
 
 import java_cup.runtime.*;
-import java.io.IOException;
-
-//import something
 
 %%
 
-//fix these sections
-%class Lex
-
+%class Lexer
+%unicode
+%cup
 %line
 %column
-%final
-
-%cupsym Analyser.Sym
-%cup
 
 %eofval{
-    return sym(Sym.EOF);
+    return sym(sym.EOF);
 %eofval}
 
 %{
-    /* Convenience constructor for CUP Symbol object. */
-    private Symbol sym (int type) {
-        return sym(type, yytext());
-    }
+  StringBuffer string = new StringBuffer();
+  private Symbol sym(int type) { 
+    return new Symbol(type, yyline, yycolumn);
+  } 
+  private Symbol sym(int type, Object value) {
+    return new Symbol(type, yyline, yycolumn, value);
+  }
+%}  
 
-    /* Convenience constructor for CUP Symbol object. */
-    private Symbol sym (int type, Object value) {
-        return new Symbol(type, (yyline+1), yycolumn, value);
-    }
-
-    private void error () {
-        System.out.println("Error in line " + (yyline+1) + ": Unknown input '" + yytext() + "'");
-    }
-%}
+//Declared but never used 
 
 WHITESPACE  = [ \t\r\n\f]
 LETTER      = [a-zA-Z]
@@ -45,7 +32,7 @@ DIGIT       = [0-9]
 PUNCTUATION = [\.,-\/#!$%\^&\*;:{}=\-_`~()]
 NUM_NO_ZERO = [1-9][0-9]* // Cannot start with 0.
 
-/* Literals macros. */
+//Literal cfgs
 IDENTIFIER  = {LETTER}({LETTER}|{DIGIT}|"_")*
 CHAR_LIT    = "'"({LETTER}|{DIGIT}|{PUNCTUATION})"'"
 BOOL_LIT    = ("T"|"F")
@@ -54,102 +41,105 @@ FLOAT_LIT   = -?{DIGIT}+"."{DIGIT}+
 RAT_LIT     = (INT_LIT"_")?INT_LIT"/"INT_LIT
 STR_LIT     = "\"" ~"\""
 
+%state STRING 
 %%
 
-//=====================================================================================================================
-
+<YYINITIAL> {
 //To be ignored
 {WHITESPACE}        {} /* Ignore extra whitespace */
 "#".*[\r|\n|\r\n]   {} /* Single-line comments */
 "/#"~ "#/"          {} /* Multi-line comments */
 
 //Primitives
-"char"      { return sym(Sym.CHAR); }
-"bool"      { return sym(Sym.BOOL); }
-"int"       { return sym(Sym.INT); }
-"rat"       { return sym(Sym.RAT); }
-"float"     { return sym(Sym.FLOAT); }
-"top"       { return sym(Sym.TOP); }
-"void"		{ return sym(Sym.VOID); }
+"char"      { return sym(sym.CHAR); }
+"bool"      { return sym(sym.BOOL); }
+"int"       { return sym(sym.INT); }
+"rat"       { return sym(sym.RAT); }
+"float"     { return sym(sym.FLOAT); }
+"top"       { return sym(sym.TOP); }
+"void"      { return sym(sym.VOID); }
 
 //Aggregates
-"dict"      { return sym(Sym.DICT); }
-"seq"		{ return sym(Sym.SEQ); }
+"dict"      { return sym(sym.DICT); }
+"seq"       { return sym(sym.SEQ); }
 
 //Aggregate operators
-"in"        { return sym(Sym.IN); }
-"len"       { return sym(Sym.LEN); }
-"::"        { return sym(Sym.CONCAT); }
+"in"        { return sym(sym.IN); }
+"len"       { return sym(sym.LEN); }
+"::"        { return sym(sym.CONCAT); }
 
 //Definitions/Declarations
-"tdef"      { return sym(Sym.TDEF); }
-"fdef"      { return sym(Sym.FDEF); }
+"tdef"      { return sym(sym.TDEF); }
+"fdef"      { return sym(sym.FDEF); }
 
 //Input operator
-"read"      { return sym(Sym.READ); }
+"read"      { return sym(sym.READ); }
 
 //Output operator
-"print"     { return sym(Sym.PRINT); }
+"print"     { return sym(sym.PRINT); }
 
 //Control flow operators
-"if"        { return sym(Sym.IF); }
-"else"      { return sym(Sym.ELSE); }
-"while"     { return sym(Sym.WHILE); }
-"do"        { return sym(Sym.DO); }
-"forall"    { return sym(Sym.FORALL); }
-"return"    { return sym(Sym.RET); }
+"if"        { return sym(sym.IF); }
+"then"      { return sym(sym.THEN); }
+"else"      { return sym(sym.ELSE); }
+"while"     { return sym(sym.WHILE); }
+"do"        { return sym(sym.DO); }
+"forall"    { return sym(sym.FORALL); }
+"return"    { return sym(sym.RET); }
 
 //Logical operators
-"!"         { return sym(Sym.NOT); }
-"&&"        { return sym(Sym.AND); }
-"||"        { return sym(Sym.OR); }
-"=>"        { return sym(Sym.IMPLY); }
+"!"         { return sym(sym.NOT); }
+"&&"        { return sym(sym.AND); }
+"||"        { return sym(sym.OR); }
+"=>"        { return sym(sym.IMPLY); }
 
 //Relational operators
-"<"         { return sym(Sym.LTHAN); }
-"<="        { return sym(Sym.LTHANEQ); }
-"=="        { return sym(Sym.EQUALS); }
-"!="        { return sym(Sym.NEQUALS); }
-//">"         { return sym(Sym.MTHAN); } //not sure about this
-//">="        { return sym(Sym.MTHANEQ); } //not sure about this
+"<"         { return sym(sym.LTHAN); }
+"<="        { return sym(sym.LTHANEQ); }
+"=="        { return sym(sym.EQUALS); }
+"!="        { return sym(sym.NEQUALS); }
+//">"         { return sym(sym.MTHAN); } //not sure about this
+//">="        { return sym(sym.MTHANEQ); } //not sure about this
 
 //Arithmetic operators
-"+"         { return sym(Sym.PLUS); }
-"-"         { return sym(Sym.MINUS); }
-"*"         { return sym(Sym.TIMES); }
-"/"         { return sym(Sym.DIV); }
-"^"         { return sym(Sym.POW); }
+"+"         { return sym(sym.PLUS); }
+"-"         { return sym(sym.MINUS); }
+"*"         { return sym(sym.TIMES); }
+"/"         { return sym(sym.DIV); }
+"^"         { return sym(sym.POW); }
 
 //Expression operators
-"."			{ return sym(Sym.DOT); } //not sure about this
-":=" 		{ return sym(Sym.ASSIGN); }
+"."         { return sym(sym.DOT); }
+":="        { return sym(sym.ASSIGN); }
 
 //Other
-"<"			{ return sym(Sym.LANGBR); }
-">"			{ return sym(Sym.RANGBR); }
-"("         { return sym(Sym.LPAREN); }
-")"         { return sym(Sym.RPAREN); }
-"{"         { return sym(Sym.LBRACE); }
-"}"         { return sym(Sym.RBRACE); }
-"["         { return sym(Sym.LBRACK); }
-"]"         { return sym(Sym.RBRACK); }
-// "[|"        { return sym(Sym.LDICT); }
-// "|]"        { return sym(Sym.RDICT); }
-","         { return sym(Sym.COMMA); }
-":"         { return sym(Sym.COL); }
-";"         { return sym(Sym.SEMICOL); }
-"main"      { return sym(Sym.MAIN); }
+// "<"         { return sym(sym.LANGBR); }
+">"         { return sym(sym.RANGBR); }
+"("         { return sym(sym.LPAREN); }
+")"         { return sym(sym.RPAREN); }
+"{"         { return sym(sym.LBRACE); }
+"}"         { return sym(sym.RBRACE); }
+"["         { return sym(sym.LBRACK); }
+"]"         { return sym(sym.RBRACK); }
+// "[|"        { return sym(sym.LDICT); }
+// "|]"        { return sym(sym.RDICT); }
+","         { return sym(sym.COMMA); }
+":"         { return sym(sym.COL); }
+";"         { return sym(sym.SEMICOL); }
+"main"      { return sym(sym.MAIN); }
 
 //Loop terminators
-"fi"        { return syn(Sym.ENDIF); }
-"od"        { return syn(Sym.ENDDO); }
+"fi"        { return sym(sym.ENDIF); }
+"od"        { return sym(sym.ENDDO); }
 
 //Literals
-{CHAR_LIT}  { return sym(Sym.CHAR_LIT); }
-{BOOL_LIT}  { return sym(Sym.BOOL_LIT); }
-{FLOAT_LIT} { return sym(Sym.FLOAT_LIT); }
-{INT_LIT}   { return sym(Sym.INT_LIT); }
-{STR_LIT}   { return sym(Sym.STR_LIT); }
-{IDENTIFIER}{ return sym(Sym.ID); }
-{RAT_LIT}   { return sym.(Sym.RAT_LIT); }
-.           { /*System.out.println ("<ERROR>");*/ error(); } // For any other symbols, print error.
+{CHAR_LIT}  { return sym(sym.CHAR_LIT); }
+{BOOL_LIT}  { return sym(sym.BOOL_LIT); }
+{FLOAT_LIT} { return sym(sym.FLOAT_LIT); }
+{INT_LIT}   { return sym(sym.INT_LIT); }
+{STR_LIT}   { return sym(sym.STR_LIT); }
+{IDENTIFIER} { return sym(sym.ID); }
+{RAT_LIT}   { return sym(sym.RAT_LIT); }
+}
+
+[^]         { throw new Error(); }
