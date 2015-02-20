@@ -54,7 +54,7 @@ terminal        PLUS, MINUS, TIMES, DIV, POW;
 terminal        DOT , ASSIGN;
 
 //Other tokens
-terminal        LANGBR, RANGBR, LPAREN, RPAREN, LBRACE, RBRACE, LBRACK, RBRACK, LDICT, RDICT, COMMA, COL, SEMICOL, MAIN;
+terminal        LANGBR, RANGBR, LPAREN, RPAREN, LBRACE, RBRACE, LBRACK, RBRACK, /*LDICT, RDICT,*/ COMMA, COL, SEMICOL, MAIN;
 
 //Loop terminators
 terminal        ENDIF, ENDDO;
@@ -91,7 +91,8 @@ main_func       ::= VOID MAIN block;
 
 //=====================================================================================================================
 
-type            ::= CHAR | BOOL | INT | RAT | FLOAT | DICT | SEQ | TOP;
+type            ::= CHAR | BOOL | INT | RAT | FLOAT | TOP;
+aggreg          ::= DICT | SEQ;
 literal         ::= CHAR_LIT | BOOL_LIT | INT_LIT | FLOAT_LIT | RAT_LIT | dict_lit | sequence;
 sequence        ::= STR_LIT
                   | list_lit
@@ -107,7 +108,7 @@ comma_list      ::= expr
                   |
                   ;
                   
-dict_lit        ::= LDICT dict_comma_list RDICT;
+dict_lit        ::= LBRACE dict_comma_list RBRACE;
 dict_comma_list ::= dict_pair
                   | dict_pair COMMA dict_comma_list
                   |
@@ -139,6 +140,7 @@ var_decl        ::= type ID
                   | type assign_stat
                   /* | error assign_stat {: System.err.println("Expected rule 'var_decl'."); :} */
                   | SEQ LANGBR type RANGBR /* seq<type>*/
+                  | DICT LANGBR type COMMA type RANGBR /* seq<type,type> */
                   ;
 
 //=====================================================================================================================

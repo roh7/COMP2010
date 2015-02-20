@@ -39,7 +39,7 @@ import java.io.IOException;
     }
 %}
 
-WHITESPACE  = [ \t\r\n\f] // \f is the form feed control character.
+WHITESPACE  = [ \t\r\n\f]
 LETTER      = [a-zA-Z]
 DIGIT       = [0-9]
 PUNCTUATION = [\.,-\/#!$%\^&\*;:{}=\-_`~()]
@@ -133,8 +133,8 @@ STR_LIT     = "\"" ~"\""
 "}"         { return sym(Sym.RBRACE); }
 "["         { return sym(Sym.LBRACK); }
 "]"         { return sym(Sym.RBRACK); }
-"[|"        { return sym(Sym.LDICT); }
-"|]"        { return sym(Sym.RDICT); }
+// "[|"        { return sym(Sym.LDICT); }
+// "|]"        { return sym(Sym.RDICT); }
 ","         { return sym(Sym.COMMA); }
 ":"         { return sym(Sym.COL); }
 ";"         { return sym(Sym.SEMICOL); }
@@ -151,4 +151,5 @@ STR_LIT     = "\"" ~"\""
 {INT_LIT}   { return sym(Sym.INT_LIT); }
 {STR_LIT}   { return sym(Sym.STR_LIT); }
 {IDENTIFIER}{ return sym(Sym.ID); }
+{RAT_LIT}   { return sym.(Sym.RAT_LIT); }
 .           { /*System.out.println ("<ERROR>");*/ error(); } // For any other symbols, print error.
