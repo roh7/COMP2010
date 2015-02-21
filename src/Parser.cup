@@ -134,6 +134,8 @@ dict_pair       ::= literal COL literal;
 
 func_def        ::= FDEF ID LPAREN param_list RPAREN block SEMICOL
                   | FDEF ID LPAREN param_list RPAREN block COL type SEMICOL //check returnType!
+                  | FDEF ID LPAREN param_list RPAREN block COL SEQ LTHAN type RANGBR SEMICOL //check returnType!
+                  | FDEF ID LPAREN param_list RPAREN block COL DICT LTHAN type COMMA type RANGBR SEMICOL //check returnType!
                   ;
 
 data_def        ::= TDEF ID LBRACE data_list RBRACE SEMICOL;
@@ -144,6 +146,10 @@ data_list       ::= ID COL type
                   
 param_list      ::= ID COL type
                   | ID COL type COMMA param_list
+                  | ID COL SEQ LTHAN type RANGBR COMMA param_list
+                  | ID COL SEQ LTHAN type RANGBR
+                  | ID COL DICT LTHAN type COMMA type RANGBR
+                  | ID COL DICT LTHAN type COMMA type RANGBR COMMA param_list
                   |
                   ;
 //param_list      ::= data_list //check this

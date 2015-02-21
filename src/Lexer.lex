@@ -96,7 +96,7 @@ STR_LIT     = "\"" ~"\""
 //Relational operators
 "<"         { return sym(sym.LTHAN); }
 "<="        { return sym(sym.LTHANEQ); }
-"=="        { return sym(sym.EQUALS); }
+"="        { return sym(sym.EQUALS); }
 "!="        { return sym(sym.NEQUALS); }
 //">"         { return sym(sym.MTHAN); } //not sure about this
 //">="        { return sym(sym.MTHANEQ); } //not sure about this
@@ -143,4 +143,4 @@ STR_LIT     = "\"" ~"\""
 {RAT_LIT}   { return sym(sym.RAT_LIT); }
 }
 
-[^]         { throw new Error(); }
+[^]         { throw new Error("Line " + yyline+1 + ", Column " + yycolumn); }

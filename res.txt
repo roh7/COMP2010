@@ -1,0 +1,56 @@
+Work fine
+===========================
+p-rat0.s
+n-nestedTypeDef0.s
+p-fp0.s
+p-emptyDict.s
+p-return0.s
+p-emptySeq.s
+n-decl.s
+p-return1.s
+n-fib.s
+n-funcParamTypeError0.s
+p-main0.s
+n-multiple-assignment.s
+p-main1.s
+
+Failed
+===========================
+p-reverse.s
+		FEEX IT EARL p-alice.s
+		FEEX IT EARL p-sequences.s
+p-tdef0.s
+		FEEX IT EARL p-adt.s
+
+Full retard
+===========================
+p-fib.s
+p-function0.s
+p-ifthenelse0.s
+p-ifthenelse1.s
+
+
+=======================================================================================
+
+java -cp bin/:lib/java-cup-11b-runtime.jar SC tests/open/p-reverse.s
+Syntax error at line 14, column 0
+Couldn't repair and continue parse at character 13 of input
+
+		**EARL PLS FEEX IT**	
+		java -cp bin/:lib/java-cup-11b-runtime.jar SC tests/open/p-alice.s
+		Syntax error at line 1, column 3
+		Couldn't repair and continue parse at character 0 of input
+
+		**EARL PLS FEEX IT**
+		java -cp bin/:lib/java-cup-11b-runtime.jar SC tests/open/p-sequences.s
+		Syntax error at line 1, column 7
+		Couldn't repair and continue parse at character 0 of input
+
+java -cp bin/:lib/java-cup-11b-runtime.jar SC tests/open/p-tdef0.s
+Syntax error at line 2, column 7
+Couldn't repair and continue parse at character 1 of input
+
+		**EARL PLS FEEX IT**
+		java -cp bin/:lib/java-cup-11b-runtime.jar SC tests/open/p-adt.s
+		Syntax error at line 2, column 18
+		Couldn't repair and continue parse at character 1 of input
