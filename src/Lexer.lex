@@ -57,7 +57,7 @@ STR_LIT     = "\"" ~"\""
 "rat"       { return sym(sym.RAT); }
 "float"     { return sym(sym.FLOAT); }
 "top"       { return sym(sym.TOP); }
-"void"      { return sym(sym.VOID); }
+// "void"      { return sym(sym.VOID); }
 
 //Aggregates
 "dict"      { return sym(sym.DICT); }

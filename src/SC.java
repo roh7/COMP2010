@@ -14,7 +14,7 @@ class SC {
 				Parser parser = new Parser(lexer);
 				Symbol result = parser.parse();
 				if(!parser.syntaxErrors){
-					System.out.println("parsing successful");
+					// System.out.println("parsing successful");
 				}
 
 			} catch (Exception e) {

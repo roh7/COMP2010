@@ -6,27 +6,14 @@ import java_cup.runtime.*;
 
 parser code
 {:
-    public void report_error(String message, Object info) {
-    
-        StringBuffer err = new StringBuffer("Error in line ");
-        java_cup.runtime.Symbol s = (java_cup.runtime.Symbol)info;
-        err.append((s.left) + ": ");
-        System.err.print(err);
-    }
-    
-    public void report_fatal_error(String message, Object info) {
-        report_error(message, info);
-        System.exit(1);
-    }
+	public void syntax_error(Symbol current_token)
+	{
+		syntaxErrors = true;
+		report_error("Syntax error at line " + (current_token.left + 1) +
+					", column " + current_token.right,  null);
+	}
 
-    public void syntax_error(Symbol current_token)
-    {
-        report_error("Syntax error at line " + (current_token.left + 1) +
-            ", column " + current_token.right + "\n",  null);
-        syntaxErrors = true;
-    }
-
-    public boolean syntaxErrors = false;
+	public boolean syntaxErrors = false;
 :}
 
 action code
@@ -102,7 +89,7 @@ glob_decl       ::= var_decl_part
                   | func_def
                   | data_def
                   ;
-main_func       ::= VOID MAIN block;
+main_func       ::= /*VOID*/ MAIN block;
 
 //=====================================================================================================================
 
@@ -131,15 +118,15 @@ dict_comma_list ::= dict_pair
 dict_pair       ::= literal COL literal;
 
 // func_def        ::= FDEF type ID LPAREN param_list RPAREN block;
-func_def        ::= FDEF ID LPAREN param_list RPAREN COL type block;
+func_def        ::= FDEF ID LPAREN param_list RPAREN /*COL type*/ block SEMICOL; //semicol added
 data_def        ::= TDEF ID COL data_list SEMICOL;
 data_list       ::= ID COL type
                   | ID COL type COMMA data_list
                   |
                   ;
                   
-param_list      ::= type ID
-                  | type ID COMMA param_list
+param_list      ::= ID COL type
+                  | ID COL type COMMA param_list
                   |
                   ;
 
@@ -158,7 +145,7 @@ var_decl        ::= ID COL type
                   | assign_stat COL type
                   /* | error assign_stat {: System.err.println("Expected rule 'var_decl'."); :} */
                   | SEQ LTHAN type RANGBR /* seq<type>*/
-                  | DICT LTHAN type COMMA type RANGBR /* seq<type,type> */
+                  | DICT LTHAN type COMMA type RANGBR /* dict<type,type> */
                   ;
 
 //=====================================================================================================================
