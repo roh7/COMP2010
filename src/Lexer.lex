@@ -127,6 +127,7 @@ STR_LIT     = "\"" ~"\""
 ":"         { return sym(sym.COL); }
 ";"         { return sym(sym.SEMICOL); }
 "main"      { return sym(sym.MAIN); }
+//"alias"     { return sym(sym.ALIAS); }
 
 //Loop terminators
 "fi"        { return sym(sym.ENDIF); }

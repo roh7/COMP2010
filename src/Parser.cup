@@ -6,14 +6,14 @@ import java_cup.runtime.*;
 
 parser code
 {:
-	public void syntax_error(Symbol current_token)
-	{
-		syntaxErrors = true;
-		report_error("Syntax error at line " + (current_token.left + 1) +
-					", column " + current_token.right,  null);
-	}
+    public void syntax_error(Symbol current_token)
+    {
+        syntaxErrors = true;
+        report_error("Syntax error at line " + (current_token.left + 1) +
+                    ", column " + current_token.right,  null);
+    }
 
-	public boolean syntaxErrors = false;
+    public boolean syntaxErrors = false;
 :}
 
 action code
@@ -25,38 +25,44 @@ action code
 //Types
 terminal        CHAR, BOOL, INT, RAT, FLOAT, DICT, SEQ, TOP, VOID;
 
-//Aggregate operators
+//Aggregate 
 terminal        IN, LEN, CONCAT;
 
-//Definitions/Declarations
-terminal        TDEF, FDEF;
-
-//Input/Output operators
-terminal        READ, PRINT;
-
-// Control flow operators
-terminal        IF, THEN, ELSE, WHILE, DO, FORALL, RET;
+//TYPE ALIASING HELP PLS!
 
 //Logical operators
 terminal        NOT, AND, OR, IMPLY;
 
-//Relational operators
-terminal        LTHAN, LTHANEQ, EQUALS, NEQUALS /*,MTHAN, MTHANEQ*/;
-
 //Arithmetic operators
 terminal        PLUS, MINUS, TIMES, DIV, POW;
 
-//Expression operators
-terminal        DOT , ASSIGN;
+//Relational operators
+terminal        LTHAN, LTHANEQ, EQUALS, NEQUALS;
 
-//Other tokens
-terminal        RANGBR, LPAREN, RPAREN, LBRACE, RBRACE, LBRACK, RBRACK, /*LDICT, RDICT,*/ COMMA, COL, SEMICOL, MAIN;
+//Type and function definitions
+terminal        TDEF, FDEF;
+
+//Control flow
+terminal        IF, THEN, ELSE, WHILE, DO, FORALL, RET;
+
+//Expression operators
+terminal        ASSIGN, DOT;
 
 //Loop terminators
 terminal        ENDIF, ENDDO;
 
+//Other tokens
+terminal        LPAREN, RPAREN, LBRACE, RBRACE, LBRACK, RBRACK, COMMA, COL, SEMICOL, RANGBR /*LANGBR is LTHAN*/, MAIN;
+
+//IO
+terminal 		READ, PRINT;
+
 //Literals
 terminal        ID, CHAR_LIT, BOOL_LIT, INT_LIT, RAT_LIT, FLOAT_LIT, STR_LIT;
+
+//=====================================================================================================================
+
+/*Non terminal declarations go here*/
 
 non terminal program, glob_decl_list, glob_decl, main_func, type, aggreg, literal, sequence, accessor;
 non terminal list_lit, comma_list, dict_lit, dict_comma_list, dict_pair, func_def, data_def, data_list;
@@ -66,14 +72,15 @@ non terminal ret_expr, elem_access, len_expr, seq_slice, expr_list, expr;
 
 //=====================================================================================================================
 
-//Operator precendence
-precedence nonassoc     NOT, LTHAN, LTHANEQ, EQUALS, NEQUALS;
+//Precedence of operators
+precedence left         PLUS, MINUS, TIMES, DIV, AND, OR, CONCAT;
 precedence right        POW, IN;
-precedence left         PLUS, MINUS, TIMES, DIV, AND, CONCAT;
+precedence nonassoc     NOT, LTHAN, LTHANEQ, EQUALS, NEQUALS;
 
 //=====================================================================================================================
 
 //Productions
+
 start with program;
 
 program         ::= glob_decl_list main_func {: System.out.println("Parsing successful."); :}
@@ -85,17 +92,24 @@ program         ::= glob_decl_list main_func {: System.out.println("Parsing succ
 glob_decl_list  ::= glob_decl_list glob_decl
                   | glob_decl
                   ;
+
+//fine
 glob_decl       ::= var_decl_part
                   | func_def
                   | data_def
                   ;
-main_func       ::= /*VOID*/ MAIN block;
+//fine
+
+main_func       ::= MAIN block;
 
 //=====================================================================================================================
 
+//fine
 type            ::= CHAR | BOOL | INT | RAT | FLOAT | TOP;
 aggreg          ::= DICT | SEQ;
 literal         ::= CHAR_LIT | BOOL_LIT | INT_LIT | FLOAT_LIT | RAT_LIT | dict_lit | sequence;
+//fine
+
 sequence        ::= STR_LIT
                   | list_lit
                   ;
@@ -103,13 +117,14 @@ sequence        ::= STR_LIT
 accessor        ::= ID
                   | accessor DOT ID
                   ;
-                  
+
+//fine                  
 list_lit        ::= LBRACK comma_list RBRACK;
 comma_list      ::= expr
                   | expr COMMA comma_list
                   |
                   ;
-                  
+
 dict_lit        ::= LBRACE dict_comma_list RBRACE;
 dict_comma_list ::= dict_pair
                   | dict_pair COMMA dict_comma_list
@@ -117,9 +132,11 @@ dict_comma_list ::= dict_pair
                   ;
 dict_pair       ::= literal COL literal;
 
-// func_def        ::= FDEF type ID LPAREN param_list RPAREN block;
-func_def        ::= FDEF ID LPAREN param_list RPAREN /*COL type*/ block SEMICOL; //semicol added
-data_def        ::= TDEF ID COL data_list SEMICOL;
+func_def        ::= FDEF ID LPAREN param_list RPAREN block SEMICOL
+                  | FDEF ID LPAREN param_list RPAREN block COL type SEMICOL //check returnType!
+                  ;
+
+data_def        ::= TDEF ID LBRACE data_list RBRACE SEMICOL;
 data_list       ::= ID COL type
                   | ID COL type COMMA data_list
                   |
@@ -129,6 +146,8 @@ param_list      ::= ID COL type
                   | ID COL type COMMA param_list
                   |
                   ;
+//param_list      ::= data_list //check this
+//fine
 
 block           ::= LBRACE var_decl_list stat_list RBRACE 
                   | LBRACE stat_list RBRACE
@@ -141,11 +160,13 @@ var_decl_list   ::= var_decl_list var_decl_part
 var_decl_part   ::= var_decl SEMICOL;
 // var_decl        ::= type ID
 var_decl        ::= ID COL type
+				  | ID COL type ASSIGN expr	
                   // | type assign_stat
                   | assign_stat COL type
                   /* | error assign_stat {: System.err.println("Expected rule 'var_decl'."); :} */
-                  | SEQ LTHAN type RANGBR /* seq<type>*/
-                  | DICT LTHAN type COMMA type RANGBR /* dict<type,type> */
+                  | ID COL SEQ LTHAN type RANGBR /* seq<type>*/
+                  | ID COL DICT LTHAN type COMMA type RANGBR /* dict<type,type> */
+                  | ID COL DICT LTHAN type COMMA type RANGBR ASSIGN expr
                   ;
 
 //=====================================================================================================================
@@ -209,6 +230,7 @@ expr            ::= expr TIMES expr //needs an OR used somewhere and IMPLIES
                   | expr POW expr
                   | NOT expr
                   | expr AND expr
+				  | expr OR expr
                   | expr LTHAN expr
                   | expr LTHANEQ expr
                   | expr EQUALS expr
