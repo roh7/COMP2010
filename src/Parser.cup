@@ -165,6 +165,7 @@ var_decl        ::= ID COL type
                   | assign_stat COL type
                   /* | error assign_stat {: System.err.println("Expected rule 'var_decl'."); :} */
                   | ID COL SEQ LTHAN type RANGBR /* seq<type>*/
+                  | ID COL SEQ LTHAN type RANGBR ASSIGN expr/* seq<type>*/
                   | ID COL DICT LTHAN type COMMA type RANGBR /* dict<type,type> */
                   | ID COL DICT LTHAN type COMMA type RANGBR ASSIGN expr
                   ;
