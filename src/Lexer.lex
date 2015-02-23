@@ -36,9 +36,10 @@ NUM_NO_ZERO = [1-9][0-9]* // Cannot start with 0.
 IDENTIFIER  = {LETTER}({LETTER}|{DIGIT}|"_")*
 CHAR_LIT    = "'"({LETTER}|{DIGIT}|{PUNCTUATION})"'"
 BOOL_LIT    = ("T"|"F")
-INT_LIT     = 0|-?{NUM_NO_ZERO}
-FLOAT_LIT   = -?{DIGIT}+"."{DIGIT}+
-RAT_LIT     = (INT_LIT"_")?INT_LIT"/"INT_LIT
+INT_LIT     = 0|{NUM_NO_ZERO}
+FLOAT_LIT   = {DIGIT}+"."{DIGIT}+
+RAT_LIT     = (INT_LIT"_")?INT_LIT"/"INT_LIT|INT_LIT
+// RAT_LIT     = (({INT_LIT}"_"{INT_LIT}"/"{INT_LIT})|({INT_LIT}"/"{INT_LIT})|({INT_LIT}))
 STR_LIT     = "\"" ~"\""
 
 %state STRING 
@@ -127,7 +128,7 @@ STR_LIT     = "\"" ~"\""
 ":"         { return sym(sym.COL); }
 ";"         { return sym(sym.SEMICOL); }
 "main"      { return sym(sym.MAIN); }
-//"alias"     { return sym(sym.ALIAS); }
+"alias"     { return sym(sym.ALIAS); }
 
 //Loop terminators
 "fi"        { return sym(sym.ENDIF); }
