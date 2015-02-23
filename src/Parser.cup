@@ -1,0 +1,256 @@
+//Parser.cup
+//19/02/2014 - Rohan Kopparapu, Sam Fallahi, David Lipowicz
+//Notes - look at type aliasing
+
+import java_cup.runtime.*;
+
+parser code
+{:
+    public void syntax_error(Symbol current_token)
+    {
+        syntaxErrors = true;
+        report_error("Syntax error at line " + (current_token.left + 1) +
+                    ", column " + current_token.right,  null);
+    }
+
+    public boolean syntaxErrors = false;
+:}
+
+action code
+{:
+:}
+
+//=====================================================================================================================
+
+//Types
+terminal        CHAR, BOOL, INT, RAT, FLOAT, DICT, SEQ, TOP;
+
+//Aggregate 
+terminal        IN, LEN, CONCAT;
+
+//TYPE ALIASING HELP PLS!
+
+//Logical operators
+terminal        NOT, AND, OR, IMPLY;
+
+//Arithmetic operators
+terminal        PLUS, MINUS, TIMES, DIV, POW;
+
+//Relational operators
+terminal        LTHAN, LTHANEQ, EQUALS, NEQUALS;
+
+//Type and function definitions
+terminal        TDEF, FDEF;
+
+//Control flow
+terminal        IF, THEN, ELSE, WHILE, DO, FORALL, RET;
+
+//Expression operators
+terminal        ASSIGN, DOT;
+
+//Loop terminators
+terminal        ENDIF, ENDDO;
+
+//Other tokens
+terminal        LPAREN, RPAREN, LBRACE, RBRACE, LBRACK, RBRACK, COMMA, COL, SEMICOL, RANGBR /*LANGBR is LTHAN*/, MAIN, ALIAS;
+
+//IO
+terminal 	    READ, PRINT;
+
+//Literals
+terminal        ID, CHAR_LIT, BOOL_LIT, INT_LIT, RAT_LIT, FLOAT_LIT, STR_LIT;
+
+//=====================================================================================================================
+
+/*Non terminal declarations go here*/
+
+non terminal program, glob_decl_list, glob_decl, main_func, type, literal, sequence, accessor;
+non terminal list_lit, comma_list, dict_lit, dict_comma_list, dict_pair, func_def, data_def, data_list;
+non terminal param_list, block, var_decl_list, var_decl_part, var_decl, stat_list, stat_part, stat;
+non terminal assign_stat, io_stat, func_call, if_else, while_do, for_all;
+non terminal ret_expr, elem_access, len_expr, seq_slice, expr_list, expr;
+
+non terminal prim_type, aggreg_type, dict_def, seq_def, inblock, alias_decl;
+
+//=====================================================================================================================
+
+//Precedence of operators
+precedence left         PLUS, MINUS, TIMES, DIV, AND, OR, CONCAT;
+precedence right        POW, IN;
+precedence nonassoc     NOT, LTHAN, LTHANEQ, EQUALS, NEQUALS;
+
+//lol
+precedence left IMPLY;
+
+//=====================================================================================================================
+
+//Productions
+
+start with program;
+
+program         ::= glob_decl_list main_func {: :}
+                  ;
+
+glob_decl_list  ::= glob_decl glob_decl_list 
+                  |
+                  ;
+
+//fine
+glob_decl       ::= var_decl_part
+                  | func_def
+                  | data_def
+                  | alias_decl
+                  ;
+//fine
+
+main_func       ::= MAIN block;
+
+//=====================================================================================================================
+
+//fine
+type            ::= prim_type | aggreg_type | ID ;
+prim_type       ::= CHAR | BOOL | INT | RAT | FLOAT | TOP;
+aggreg_type     ::= dict_def | seq_def;
+literal         ::= CHAR_LIT | BOOL_LIT | INT_LIT | FLOAT_LIT | RAT_LIT | dict_lit | sequence;
+//fine
+
+dict_def        ::= DICT LTHAN type COMMA type RANGBR;
+seq_def         ::= SEQ LTHAN type RANGBR;
+
+sequence        ::= STR_LIT
+                  | list_lit
+                  ;
+
+accessor        ::= ID
+                  | accessor DOT ID
+                  ;
+
+//fine                  
+list_lit        ::= LBRACK comma_list RBRACK;
+comma_list      ::= expr
+                  | expr COMMA comma_list
+                  |
+                  ;
+
+dict_lit        ::= LBRACE dict_comma_list RBRACE;
+dict_comma_list ::= dict_pair
+                  | dict_pair COMMA dict_comma_list
+                  |
+                  ;
+dict_pair       ::= literal COL literal;
+
+func_def        ::= FDEF ID LPAREN param_list RPAREN block SEMICOL
+                  | FDEF ID LPAREN param_list RPAREN block COL type SEMICOL //check returnType!
+                  ;
+
+data_def        ::= TDEF ID LBRACE data_list RBRACE SEMICOL;
+data_list       ::= ID COL type
+                  | ID COL type COMMA data_list
+                  |
+                  ;
+                  
+param_list      ::= ID COL type
+                  | ID COL type COMMA param_list
+                  |
+                  ;
+
+alias_decl      ::= ALIAS type ID SEMICOL;
+
+block           ::= LBRACE inblock RBRACE;
+                  
+var_decl_list   ::= var_decl_list var_decl_part
+                  | var_decl_part
+                  ;
+var_decl_part   ::= var_decl SEMICOL;
+// var_decl        ::= type ID
+var_decl        ::= ID COL type
+			| ID COL type ASSIGN expr_list	
+                  | assign_stat COL type
+                  ;
+
+//=====================================================================================================================
+
+//Rules for statements
+
+inblock         ::= stat_part inblock
+                  | var_decl_part inblock
+                  | alias_decl inblock
+                  | data_def inblock
+                  |
+                  ;
+
+stat_list       ::= stat_list stat_part
+                  | stat_part;
+                  
+stat_part       ::= stat SEMICOL
+                  | if_else
+                  | while_do
+                  | for_all
+                  ;
+
+stat            ::= assign_stat
+                  | io_stat
+                  | func_call
+                  | ret_expr
+                  ;
+assign_stat     ::= accessor ASSIGN expr_list
+                  | elem_access ASSIGN expr
+                  ;
+io_stat         ::= READ accessor
+                  | PRINT expr_list
+                  ;
+func_call       ::= ID LPAREN expr_list RPAREN;
+if_else         ::= IF LPAREN expr RPAREN THEN inblock ELSE inblock ENDIF
+                  | IF LPAREN expr RPAREN THEN inblock ENDIF
+                  ;
+// while_do        ::= WHILE LPAREN expr RPAREN DO block ENDDO; //check
+while_do        ::= WHILE LPAREN expr RPAREN DO var_decl_list stat_list ENDDO
+                  | WHILE LPAREN expr RPAREN DO stat_list ENDDO
+                  ;
+
+// for_all         ::= FORALL LPAREN ID COL ID RPAREN block; //check
+for_all         ::= FORALL LPAREN ID IN ID RPAREN DO var_decl_list stat_list ENDDO
+                  | FORALL LPAREN ID IN ID RPAREN DO stat_list ENDDO
+                  ;
+
+
+ret_expr        ::= RET expr
+                  | RET;
+
+elem_access     ::= ID LBRACK expr RBRACK;
+
+len_expr        ::= LEN LPAREN ID RPAREN;
+seq_slice       ::= ID LBRACK expr COL expr RBRACK    
+                  | ID LBRACK COL expr RBRACK
+                  | ID LBRACK expr COL RBRACK
+                  ;
+expr_list       ::= expr
+                  | expr COMMA expr_list
+                  |
+                  ;               
+
+expr            ::= expr TIMES expr //needs an OR used somewhere and IMPLY
+                  | expr PLUS expr
+                  | expr MINUS expr
+                  | MINUS expr
+                  | expr DIV expr
+                  | expr POW expr
+                  | NOT expr
+                  | expr AND expr
+			| expr OR expr
+                  | expr LTHAN expr
+                  | expr LTHANEQ expr
+                  | expr EQUALS expr
+                  | expr NEQUALS expr
+                  | expr CONCAT expr
+                  | expr IN expr
+                  | LPAREN expr RPAREN
+                  | elem_access
+                  | func_call
+                  | len_expr
+                  | seq_slice
+                  | accessor
+                  | literal
+                  | expr IMPLY expr
+                  ;
+

@@ -14,7 +14,7 @@ main {
   b:bool;
 
   if (s1 < s2 || s1 = s2) then
-     b  :=  s1 + s2 / (s1 + s2) >= 30;
+     b  :=  s1 + s2 / (s1 + s2) <= 30;
   else 
      /# do something else #/
   fi
