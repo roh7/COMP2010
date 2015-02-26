@@ -10,7 +10,7 @@ parser code
     {
         syntaxErrors = true;
         report_error("Syntax error at line " + (current_token.left + 1) +
-                    ", column " + current_token.right,  null);
+                    ", column " + current_token.right + "\n",  null);
     }
 
     public boolean syntaxErrors = false;
@@ -176,7 +176,7 @@ inblock         ::= stat_part inblock
                   | var_decl_part inblock
                   | alias_decl inblock
                   | data_def inblock
-                  |
+                  // | //should no longer have empty blocks
                   ;
 
 stat_list       ::= stat_list stat_part
@@ -209,8 +209,9 @@ while_do        ::= WHILE LPAREN expr RPAREN DO var_decl_list stat_list ENDDO
                   ;
 
 // for_all         ::= FORALL LPAREN ID COL ID RPAREN block; //check
-for_all         ::= FORALL LPAREN ID IN ID RPAREN DO var_decl_list stat_list ENDDO
+for_all         ::= /*FORALL LPAREN ID IN ID RPAREN DO var_decl_list stat_list ENDDO
                   | FORALL LPAREN ID IN ID RPAREN DO stat_list ENDDO
+                  |*/ FORALL LPAREN EXPR RPAREN DO stat_list ENDDO
                   ;
 
 
