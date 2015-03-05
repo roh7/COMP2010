@@ -1,7 +1,7 @@
 fdef invert(d:dict<top,top>) {
   t:dict<top,top> := {}; 
   i:int := 0;
-  if( len(d) > 0 ) then
+  if( len(d) < 0 ) then
     while ( i < len(d) ) do 
       t[d[i]] := i;
       i := i + 1;  

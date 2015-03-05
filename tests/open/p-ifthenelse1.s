@@ -12,9 +12,9 @@ fdef foo( pos : int ) {
 		fi
 	fi	
 	return foo(pos-1) + foo(pos-2);
-} ;
+};
 
 main {
 	foo( 13 );
 	return;
-}
+};

@@ -10,7 +10,7 @@ parser code
     {
         syntaxErrors = true;
         report_error("Syntax error at line " + (current_token.left + 1) +
-                    ", column " + current_token.right,  null);
+                    ", column " + current_token.right + "\n",  null);
     }
 
     public boolean syntaxErrors = false;
@@ -88,7 +88,7 @@ precedence left IMPLY;
 
 start with program;
 
-program         ::= glob_decl_list main_func {: :}
+program         ::= glob_decl_list main_func glob_decl_list {: :}
                   ;
 
 glob_decl_list  ::= glob_decl glob_decl_list 
@@ -103,7 +103,8 @@ glob_decl       ::= var_decl_part
                   ;
 //fine
 
-main_func       ::= MAIN block;
+main_func       ::= MAIN block SEMICOL
+				  ;
 
 //=====================================================================================================================
 
@@ -164,7 +165,7 @@ var_decl_list   ::= var_decl_list var_decl_part
 var_decl_part   ::= var_decl SEMICOL;
 // var_decl        ::= type ID
 var_decl        ::= ID COL type
-			| ID COL type ASSIGN expr_list	
+				  | ID COL type ASSIGN expr_list	
                   | assign_stat COL type
                   ;
 
@@ -176,7 +177,11 @@ inblock         ::= stat_part inblock
                   | var_decl_part inblock
                   | alias_decl inblock
                   | data_def inblock
-                  |
+                  // |
+				  |stat_part
+				  |var_decl_part
+				  |alias_decl
+				  |data_def
                   ;
 
 stat_list       ::= stat_list stat_part
@@ -229,7 +234,7 @@ expr_list       ::= expr
                   |
                   ;               
 
-expr            ::= expr TIMES expr //needs an OR used somewhere and IMPLY
+expr            ::= expr TIMES expr
                   | expr PLUS expr
                   | expr MINUS expr
                   | MINUS expr
@@ -237,7 +242,7 @@ expr            ::= expr TIMES expr //needs an OR used somewhere and IMPLY
                   | expr POW expr
                   | NOT expr
                   | expr AND expr
-			| expr OR expr
+				  | expr OR expr
                   | expr LTHAN expr
                   | expr LTHANEQ expr
                   | expr EQUALS expr
