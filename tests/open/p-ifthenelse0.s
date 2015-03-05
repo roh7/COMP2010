@@ -10,4 +10,8 @@ fdef foo( pos : int ) {
 main {
 	foo( 13 );
 	return;
-}
+};
+
+fdef add (x:int, y:int) {
+	return x + y;
+} : int;

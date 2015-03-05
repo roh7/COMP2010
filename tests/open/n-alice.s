@@ -12,7 +12,8 @@ main {
 
   while (i<len(books)) do 
      tmp := books[i];
-     if (key in tmp) then found := T; fi
+     if (key in tmp) then found := T; 
+     else fi
      i := i + 1;
   od
 

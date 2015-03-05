@@ -1,3 +1,8 @@
+main {
+	fibonacci( 13 );
+	return;
+};
+
 fdef fibonacci( pos : int ) { 
 	if (pos = -1) then
 		return 0;
@@ -7,8 +12,3 @@ fdef fibonacci( pos : int ) {
 	fi	
 	return fibonacci(pos-1) + fibonacci(pos-2);
 } ;
-
-main {
-	fibonacci( 13 );
-	return;
-}

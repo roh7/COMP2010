@@ -1,3 +1,9 @@
+main {
+	a : seq<int> := [1,2,3];
+	b : seq<int> := reverse(a);
+	return b;
+};
+
 fdef reverse (inseq : seq<top>) { 
 	outseq : seq<top> := [];
 	i : int := 0;
@@ -8,7 +14,4 @@ fdef reverse (inseq : seq<top>) {
 	return outseq; 
 } : seq<top> ;
 
-main {
-	a : seq<int> := [1,2,3];
-	b : seq<int> := reverse(a);
-}
+

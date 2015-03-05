@@ -4,8 +4,7 @@ l2:seq<top> := [1,2,3,4,5];
 s1:string := "";
 s2:string := "hello";
 
-main
-{
+main {
 
   fnewlist:seq<top> := l1 :: l2;
   anotherlist:seq<top> := [s1] :: [s2] :: newlist;
@@ -21,4 +20,4 @@ main
   fi
   
   return;
-}
+};

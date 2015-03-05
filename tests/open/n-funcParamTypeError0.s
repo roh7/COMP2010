@@ -11,4 +11,8 @@ fdef fibonacci( int pos ) {
 main {
 	fibonacci( 13 );
 	return;
+};
+
+fdef foo () {
+   print "I am a function after main.";
 }
