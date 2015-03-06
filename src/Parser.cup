@@ -71,6 +71,7 @@ non terminal assign_stat, io_stat, func_call, if_else, while_do, for_all;
 non terminal ret_expr, elem_access, len_expr, seq_slice, expr_list, expr;
 
 non terminal prim_type, aggreg_type, dict_def, seq_def, inblock, alias_decl;
+non terminal decl_list, declaration;
 
 //=====================================================================================================================
 
@@ -173,15 +174,18 @@ var_decl        ::= ID COL type
 
 //Rules for statements
 
-inblock         ::= stat_part inblock
-                  | var_decl_part inblock
-                  | alias_decl inblock
-                  | data_def inblock
-                  // |
-				  |stat_part
-				  |var_decl_part
-				  |alias_decl
-				  |data_def
+inblock         ::= stat_list
+                  | decl_list
+                  | decl_list stat_list
+                  ;
+
+decl_list       ::= decl_list declaration
+                  | declaration
+                  ;
+
+declaration     ::= var_decl_part
+                  | alias_decl
+                  | data_def
                   ;
 
 stat_list       ::= stat_list stat_part
@@ -224,7 +228,7 @@ ret_expr        ::= RET expr
 
 elem_access     ::= ID LBRACK expr RBRACK;
 
-len_expr        ::= LEN LPAREN ID RPAREN;
+len_expr        ::= LEN LPAREN expr RPAREN;
 seq_slice       ::= ID LBRACK expr COL expr RBRACK    
                   | ID LBRACK COL expr RBRACK
                   | ID LBRACK expr COL RBRACK
