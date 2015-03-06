@@ -1,4 +1,5 @@
-//not finished yet
+//Lexer.lex
+//02/03/2015 - Rohan Kopparapu, Sam Fallahi, David Lipowicz
 
 import java_cup.runtime.*;
 
@@ -39,7 +40,6 @@ BOOL_LIT    = ("T"|"F")
 INT_LIT     = 0|{NUM_NO_ZERO}
 FLOAT_LIT   = {DIGIT}+"."{DIGIT}+
 RAT_LIT     = (INT_LIT"_")?INT_LIT"/"INT_LIT|INT_LIT
-// RAT_LIT     = (({INT_LIT}"_"{INT_LIT}"/"{INT_LIT})|({INT_LIT}"/"{INT_LIT})|({INT_LIT}))
 STR_LIT     = "\"" ~"\""
 
 %state STRING 
@@ -58,7 +58,6 @@ STR_LIT     = "\"" ~"\""
 "rat"       { return sym(sym.RAT); }
 "float"     { return sym(sym.FLOAT); }
 "top"       { return sym(sym.TOP); }
-// "void"      { return sym(sym.VOID); }
 
 //Aggregates
 "dict"      { return sym(sym.DICT); }
@@ -97,10 +96,8 @@ STR_LIT     = "\"" ~"\""
 //Relational operators
 "<"         { return sym(sym.LTHAN); }
 "<="        { return sym(sym.LTHANEQ); }
-"="        { return sym(sym.EQUALS); }
+"="         { return sym(sym.EQUALS); }
 "!="        { return sym(sym.NEQUALS); }
-//">"         { return sym(sym.MTHAN); } //not sure about this
-//">="        { return sym(sym.MTHANEQ); } //not sure about this
 
 //Arithmetic operators
 "+"         { return sym(sym.PLUS); }
@@ -114,7 +111,6 @@ STR_LIT     = "\"" ~"\""
 ":="        { return sym(sym.ASSIGN); }
 
 //Other
-// "<"         { return sym(sym.LANGBR); }
 ">"         { return sym(sym.RANGBR); }
 "("         { return sym(sym.LPAREN); }
 ")"         { return sym(sym.RPAREN); }
@@ -122,8 +118,6 @@ STR_LIT     = "\"" ~"\""
 "}"         { return sym(sym.RBRACE); }
 "["         { return sym(sym.LBRACK); }
 "]"         { return sym(sym.RBRACK); }
-// "[|"        { return sym(sym.LDICT); }
-// "|]"        { return sym(sym.RDICT); }
 ","         { return sym(sym.COMMA); }
 ":"         { return sym(sym.COL); }
 ";"         { return sym(sym.SEMICOL); }

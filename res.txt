@@ -1,75 +1,78 @@
-java -cp bin/:lib/java-cup-11b-runtime.jar SC tests/open/p-rat0.s
+/////////////////////////////////////////////////////////////////////////////////////// SUCCESSFUL SUCCESS
+p-rat0.s
 Parsing successful
-java -cp bin/:lib/java-cup-11b-runtime.jar SC tests/open/p-fp0.s
+p-fp0.s
 Parsing successful
-java -cp bin/:lib/java-cup-11b-runtime.jar SC tests/open/p-emptyDict.s
+p-emptyDict.s
 Parsing successful
-java -cp bin/:lib/java-cup-11b-runtime.jar SC tests/open/p-reverse.s
+p-reverse.s
 Parsing successful
-java -cp bin/:lib/java-cup-11b-runtime.jar SC tests/open/p-alice.s
+p-alice.s
 Parsing successful
-java -cp bin/:lib/java-cup-11b-runtime.jar SC tests/open/p-function0.s
+p-function0.s
 Parsing successful
-java -cp bin/:lib/java-cup-11b-runtime.jar SC tests/open/p-return0.s
+p-return0.s
 Parsing successful
-java -cp bin/:lib/java-cup-11b-runtime.jar SC tests/open/p-ifthenelse0.s
+p-ifthenelse0.s
 Parsing successful
-java -cp bin/:lib/java-cup-11b-runtime.jar SC tests/open/p-emptySeq.s
+p-emptySeq.s
 Parsing successful
-java -cp bin/:lib/java-cup-11b-runtime.jar SC tests/open/p-fib.s
+p-fib.s
 Parsing successful
-java -cp bin/:lib/java-cup-11b-runtime.jar SC tests/open/p-return1.s
+p-return1.s
 Parsing successful
-java -cp bin/:lib/java-cup-11b-runtime.jar SC tests/open/p-ifthenelse1.s
+p-ifthenelse1.s
 Parsing successful
-java -cp bin/:lib/java-cup-11b-runtime.jar SC tests/open/p-sequences.s
+p-sequences.s
 Parsing successful
-java -cp bin/:lib/java-cup-11b-runtime.jar SC tests/open/p-main0.s
+p-main0.s
 Parsing successful
-java -cp bin/:lib/java-cup-11b-runtime.jar SC tests/open/p-tdef0.s
+p-tdef0.s
 Parsing successful
-java -cp bin/:lib/java-cup-11b-runtime.jar SC tests/open/p-adt.s
+p-adt.s
 Parsing successful
-=============================================================================
-java -cp bin/:lib/java-cup-11b-runtime.jar SC tests/open/n-no-main.s
+/////////////////////////////////////////////////////////////////////////////////////// "TYPO"
+n-no-main.s
 Parsing successful
-=============================================================================
-	java -cp bin/:lib/java-cup-11b-runtime.jar SC tests/open/n-nestedTypeDef0.s
-	Syntax error at line 2, column 18
-	Couldn't repair and continue parse at character 1 of input
-	Semicolon in place of comma in dict def
+(This should not have a main function, but uhh...typo.)
+/////////////////////////////////////////////////////////////////////////////////////// SUCESSFUL FAILURE
+n-nestedTypeDef0.s
+Syntax error at line 2, column 18
+Couldn't repair and continue parse at character 1 of input
+Semicolon in place of comma in dict def
 
-	java -cp bin/:lib/java-cup-11b-runtime.jar SC tests/open/n-alice.s
-	Syntax error at line 16, column 10
-	Couldn't repair and continue parse at character 15 of input
-	Else is empty
+n-alice.s
+Syntax error at line 16, column 10
+Couldn't repair and continue parse at character 15 of input
+Else is empty
 
-	java -cp bin/:lib/java-cup-11b-runtime.jar SC tests/open/n-decl.s
-	Syntax error at line 9, column 7
-	Couldn't repair and continue parse at character 8 of input
-	Else is empty
-	Main ends without semicolon
+n-decl.s
+Syntax error at line 9, column 7
+Couldn't repair and continue parse at character 8 of input
+Else is empty
+Main ends without semicolon
 
-	java -cp bin/:lib/java-cup-11b-runtime.jar SC tests/open/n-main1.s
-	Syntax error at line 7, column 2
-	Couldn't repair and continue parse at character 6 of input
-	Empty main
+n-main1.s
+Syntax error at line 7, column 2
+Couldn't repair and continue parse at character 6 of input
+Empty main
 
-	java -cp bin/:lib/java-cup-11b-runtime.jar SC tests/open/n-fib.s
-	Syntax error at line 6, column 15
-	Couldn't repair and continue parse at character 5 of input
-	Function params declared wrong
-	Return type in wrong place
-	No semicolon after func
-	C syntax for if statements
+n-fib.s
+Syntax error at line 6, column 15
+Couldn't repair and continue parse at character 5 of input
+Function params declared wrong
+Return type in wrong place
+No semicolon after func
+C syntax for if statements
 
-	java -cp bin/:lib/java-cup-11b-runtime.jar SC tests/open/n-funcParamTypeError0.s
-	Syntax error at line 1, column 16
-	Couldn't repair and continue parse at character 0 of input
-	Function params declared wrong
-	No semicolon after func
+n-funcParamTypeError0.s
+Syntax error at line 1, column 16
+Couldn't repair and continue parse at character 0 of input
+Function params declared wrong
+No semicolon after func
 
-	java -cp bin/:lib/java-cup-11b-runtime.jar SC tests/open/n-multiple-assignment.s
-	Syntax error at line 5, column 9
-	Couldn't repair and continue parse at character 4 of input
-	Multiple assignments not allowed
+n-multiple-assignment.s
+Syntax error at line 5, column 9
+Couldn't repair and continue parse at character 4 of input
+Multiple assignments not allowed
+/////////////////////////////////////////////////////////////////////////////////////// UNSUCCESSFUL ANYTHING
