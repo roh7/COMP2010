@@ -27,8 +27,6 @@ terminal        CHAR, BOOL, INT, RAT, FLOAT, DICT, SEQ, TOP;
 //Aggregate 
 terminal        IN, LEN, CONCAT;
 
-//TYPE ALIASING HELP PLS!
-
 //Logical operators
 terminal        NOT, AND, OR, IMPLY;
 
@@ -162,6 +160,7 @@ block           ::= LBRACE inblock RBRACE;
 var_decl_list   ::= var_decl_list var_decl_part
                   | var_decl_part
                   ;
+
 var_decl_part   ::= var_decl SEMICOL;
 
 var_decl        ::= ID COL type

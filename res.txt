@@ -35,7 +35,7 @@ Parsing successful
 n-no-main.s
 Parsing successful
 (This should not have a main function, but uhh...typo.)
-/////////////////////////////////////////////////////////////////////////////////////// SUCESSFUL FAILURE
+/////////////////////////////////////////////////////////////////////////////////////// SUCCESSFUL FAILURE
 n-nestedTypeDef0.s
 Syntax error at line 2, column 18
 Couldn't repair and continue parse at character 1 of input
