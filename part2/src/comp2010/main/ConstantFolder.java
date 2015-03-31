@@ -19,6 +19,21 @@ import org.apache.bcel.classfile.ConstantInteger;
 
 import org.apache.bcel.generic.InstructionHandle;
 import org.apache.bcel.generic.InstructionList;
+import org.apache.bcel.generic.StoreInstruction;
+import org.apache.bcel.generic.ArithmeticInstruction;
+import org.apache.bcel.generic.BIPUSH;
+import org.apache.bcel.generic.DCMPG;
+import org.apache.bcel.generic.DCMPL;
+import org.apache.bcel.generic.DCONST;
+import org.apache.bcel.generic.FCMPG;
+import org.apache.bcel.generic.FCMPL;
+import org.apache.bcel.generic.FCONST;
+import org.apache.bcel.generic.ICONST;
+import org.apache.bcel.generic.LCMP;
+import org.apache.bcel.generic.LCONST;
+import org.apache.bcel.generic.LocalVariableInstruction;
+import org.apache.bcel.generic.StackInstruction;
+import org.apache.bcel.generic.Visitor;
 
 public class ConstantFolder
 {
@@ -58,19 +73,29 @@ public class ConstantFolder
 		{
 			if (constants[i] instanceof ConstantInteger)
 				System.out.println(constants[i]);
+				
 		}
 
 		// InstructionHandle is a wrapper for actual Instructions
 		for (InstructionHandle handle : instList.getInstructionHandles())
 		{
-			System.out.println(handle);
-			// if the instruction inside is iconst
-			// if (handle.getInstruction() instanceof ICONST)
-			// {
-			// }
+			//if the instruction inside is iconst
+			if (handle.getInstruction() instanceof StoreInstruction)
+			{
+				InstructionHandle valueHolder = findLastStackPush(handle);
+				if (valueHolder.getInstruction() instanceof BIPUSH) {
+					BIPUSH b= new BIPUSH((byte)0);
+					System.out.println(" I FOUND SOMETHINGGGGGGGGGGGGGGG !!!!!!!!!!!!!!!!!");
+					//b.accept(handle.getInstruction());
+					//InstructionHandle.getInstruction.accpet(valueHolder.getInstruction().getValue());
+					//System.out.println("ITS VALUE IS:" + valueHolder.getInstruction().accept(b).getValue());
+					System.out.println(valueHolder);
+					System.out.println(handle);	
+				}			
+			}
 		}
 
-		System.console().readLine();
+		//System.console().readLine();
 
 		// // setPositions(true) checks whether jump handles 
 		// // are all within the current method
@@ -85,6 +110,53 @@ public class ConstantFolder
 		// // replace the method in the original class
 		// cgen.replaceMethod(method, newMethod);
 
+	}
+
+	private InstructionHandle findLastStackPush(InstructionHandle handle) {
+		while (handle.getPrev() != null && !stackChangingOp(handle.getPrev())) {
+
+			handle = handle.getPrev();
+		
+		}
+		if (handle.getInstruction() instanceof BIPUSH) {
+			return handle;
+		}
+		// if (handle.getInstruction() instanceof FCONST) {
+		// 	return handle;
+		// }
+		// if (handle.getInstruction() instanceof LCONST) {
+		// 	return handle;
+		// }
+		// if (handle.getInstruction() instanceof DCONST) {
+		// 	return handle;
+		// }
+		// if (handle.getInstruction() instanceof ICONST) {
+		// 	return handle;
+		// }
+		
+		return handle;
+	}
+
+	private boolean stackChangingOp(InstructionHandle handle) {
+		if (handle == null) {
+			return false;
+		}
+		else if (handle.getInstruction() instanceof ArithmeticInstruction &&
+			     handle.getInstruction() instanceof BIPUSH &&
+			     handle.getInstruction() instanceof DCMPG &&
+			     handle.getInstruction() instanceof DCMPL &&
+			     handle.getInstruction() instanceof DCONST &&
+			     handle.getInstruction() instanceof FCMPG &&
+			     handle.getInstruction() instanceof FCMPL &&
+			     handle.getInstruction() instanceof FCONST &&
+			     handle.getInstruction() instanceof ICONST &&
+			     handle.getInstruction() instanceof LCMP &&
+			     handle.getInstruction() instanceof LCONST &&
+			     handle.getInstruction() instanceof LocalVariableInstruction &&
+			     handle.getInstruction() instanceof StackInstruction) {
+			return true;
+		}
+		return false;
 	}
 
 	public void optimize()
