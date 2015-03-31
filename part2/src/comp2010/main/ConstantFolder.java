@@ -17,6 +17,7 @@ import org.apache.bcel.classfile.ConstantPool;
 
 import org.apache.bcel.classfile.ConstantInteger;
 
+import org.apache.bcel.generic.Instruction;
 import org.apache.bcel.generic.InstructionHandle;
 import org.apache.bcel.generic.InstructionList;
 import org.apache.bcel.generic.StoreInstruction;
@@ -33,7 +34,6 @@ import org.apache.bcel.generic.LCMP;
 import org.apache.bcel.generic.LCONST;
 import org.apache.bcel.generic.LocalVariableInstruction;
 import org.apache.bcel.generic.StackInstruction;
-import org.apache.bcel.generic.Visitor;
 
 public class ConstantFolder
 {
@@ -80,18 +80,19 @@ public class ConstantFolder
 		for (InstructionHandle handle : instList.getInstructionHandles())
 		{
 			//if the instruction inside is iconst
+			System.out.println(handle.getInstruction());
 			if (handle.getInstruction() instanceof StoreInstruction)
 			{
 				InstructionHandle valueHolder = findLastStackPush(handle);
 				if (valueHolder.getInstruction() instanceof BIPUSH) {
-					BIPUSH b= new BIPUSH((byte)0);
-					System.out.println(" I FOUND SOMETHINGGGGGGGGGGGGGGG !!!!!!!!!!!!!!!!!");
-					//b.accept(handle.getInstruction());
-					//InstructionHandle.getInstruction.accpet(valueHolder.getInstruction().getValue());
-					//System.out.println("ITS VALUE IS:" + valueHolder.getInstruction().accept(b).getValue());
+					System.out.println("ITS VALUE IS:" + (valueHolder.getInstruction()).getValue());
 					System.out.println(valueHolder);
 					System.out.println(handle);	
-				}			
+				}	
+				else {
+					System.out.println("didnt find BIPUSH");
+					System.out.println(handle);
+				}		
 			}
 		}
 

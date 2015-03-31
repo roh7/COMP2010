@@ -1,14 +1,14 @@
 package comp2010.target;
 
 public class DynamicVariableFolding {
-    public int methodOne() {
+    public int methodOneDynamicVariableFolding() {
         int a = 42;
         int b = (a + 764) * 3;
-        a = 22;
+        a = 666;
         return b + 1234 - a;
     }
 
-    public boolean methodTwo() {
+    public boolean methodTwoDynamicVariableFolding() {
         int x = 12345;
         int y = 54321;
         System.out.println(x < y);
@@ -16,7 +16,7 @@ public class DynamicVariableFolding {
         return x > y;
     }
 
-    public int methodThree() {
+    public int methodThreeDynamicVariableFolding() {
         int i = 0;
         int j = i + 3;
         i = j + 4;
