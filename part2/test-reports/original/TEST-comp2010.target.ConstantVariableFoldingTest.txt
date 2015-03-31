@@ -1,7 +1,7 @@
 Testsuite: comp2010.target.ConstantVariableFoldingTest
-Tests run: 3, Failures: 0, Errors: 3, Skipped: 0, Time elapsed: 0.023 sec
+Tests run: 3, Failures: 0, Errors: 3, Skipped: 0, Time elapsed: 0.018 sec
 
-Testcase: testMethodThree took 0.002 sec
+Testcase: testMethodThree took 0.003 sec
 	Caused an ERROR
 comp2010.target.ConstantVariableFolding.methodThree()Z
 java.lang.NoSuchMethodError: comp2010.target.ConstantVariableFolding.methodThree()Z
