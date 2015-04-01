@@ -101,6 +101,7 @@ public class ConstantFolder
 		// istore_i
 		for (InstructionHandle handle : instList.getInstructionHandles()) {
 			if (handle.getInstruction() instanceof IINC) {
+				System.out.println("IINC found " + handle.getInstruction());
 				int incValue = ((IINC)handle.getInstruction()).getIncrement();
 				int index = ((IINC)handle.getInstruction()).getIndex();
 				instList.insert(handle, new BIPUSH((byte)incValue));
@@ -121,34 +122,42 @@ public class ConstantFolder
 		{
 			if (handle.getInstruction() instanceof StoreInstruction)
 			{
-				if (handle.getInstruction() instanceof ISTORE) {	
+				if (handle.getInstruction() instanceof ISTORE) {
 					// istore
-					if (handle.getInstruction().getOpcode() == 54){
+					if (handle.getInstruction().getOpcode() == 54) {
 						Number value = getLastStackPush(handle);
+						// System.out.println("ISTORE FOUND");
 						//bipush value every time you see iload until you see istore again.
 					}
 					// istore_0
-					if (handle.getInstruction().getOpcode() == 59){
+					if (handle.getInstruction().getOpcode() == 59) {
+						// System.out.println("ISTORE_0 FOUND");
 					}
 					// istore_1
-					if (handle.getInstruction().getOpcode() == 60){
+					if (handle.getInstruction().getOpcode() == 60) {
+						// System.out.println("ISTORE_1 FOUND");
 					}
 					// istore_2
-					if (handle.getInstruction().getOpcode() == 61){
+					if (handle.getInstruction().getOpcode() == 61) {
+						// System.out.println("ISTORE_2 FOUND");
 					}
 					// istore_3
-					if (handle.getInstruction().getOpcode() == 62){
+					if (handle.getInstruction().getOpcode() == 62) {
+						// System.out.println("ISTORE_3 FOUND");
 					}
 
 				}
 				else if (handle.getInstruction() instanceof FSTORE) {
-
+					// System.out.println("FSTORE FOUND");
 				}
-				else if (handle.getInstruction() instanceof DSTORE) {	
+				else if (handle.getInstruction() instanceof DSTORE) {
+					// System.out.println("DSTORE FOUND");
 				}
-				else if (handle.getInstruction() instanceof LSTORE) {	
+				else if (handle.getInstruction() instanceof LSTORE) {
+					// System.out.println("LSTORE FOUND");
 				}
-				else if (handle.getInstruction() instanceof ASTORE) {	
+				else if (handle.getInstruction() instanceof ASTORE) {
+					// System.out.println("ASTORE FOUND");
 				}
 				else {
 					System.out.println("INVALID DATA FORMAT");
@@ -187,7 +196,8 @@ public class ConstantFolder
 	private Number getLastStackPush(InstructionHandle handle) {
 		do {
 			handle = handle.getPrev();
-		} while(handle != null || !stackChangingOp(handle));
+			// System.out.println("THE HANDLE IS " + handle);
+		} while(handle.getPrev() != null && !stackChangingOp(handle));
 
 		if (handle.getInstruction() instanceof BIPUSH) {
 			return ((BIPUSH)handle.getInstruction()).getValue();
