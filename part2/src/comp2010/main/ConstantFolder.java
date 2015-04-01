@@ -42,6 +42,7 @@ import org.apache.bcel.generic.LCONST;
 import org.apache.bcel.generic.IINC;
 import org.apache.bcel.generic.IADD;
 import org.apache.bcel.generic.ILOAD;
+import org.apache.bcel.generic.BranchInstruction;
 
 import org.apache.bcel.generic.LocalVariableInstruction;
 import org.apache.bcel.generic.StackInstruction;
@@ -94,6 +95,7 @@ public class ConstantFolder
 
 		InstructionHandle valueHolder;
 
+		
 		// Changes the iincs to 
 		// bipush value
 		// iload_i
@@ -101,14 +103,21 @@ public class ConstantFolder
 		// istore_i
 		for (InstructionHandle handle : instList.getInstructionHandles()) {
 			if (handle.getInstruction() instanceof IINC) {
-				System.out.println("IINC found " + handle.getInstruction());
 				int incValue = ((IINC)handle.getInstruction()).getIncrement();
 				int index = ((IINC)handle.getInstruction()).getIndex();
+				System.out.println("IINC FOUND" + handle);
 				instList.insert(handle, new BIPUSH((byte)incValue));
+				
+				InstructionHandle incBipush = handle.getPrev();
+
 				instList.insert(handle, new ILOAD(index));
+				System.out.println(handle.getPrev());
 				instList.insert(handle, new IADD());
+				System.out.println(handle.getPrev());
 				instList.insert(handle, new ISTORE(index));
+				System.out.println(handle.getPrev());
 				try {
+					handleBranchInstructions(instList, handle, incBipush);
 					instList.delete(handle);
 				}
 				catch(Exception e) {
@@ -117,64 +126,107 @@ public class ConstantFolder
 			}
 		}
 
-		// InstructionHandle is a wrapper for actual Instructions
-		for (InstructionHandle handle : instList.getInstructionHandles())
-		{
-			if (handle.getInstruction() instanceof StoreInstruction)
-			{
-				if (handle.getInstruction() instanceof ISTORE) {
-					// istore
-					if (handle.getInstruction().getOpcode() == 54) {
-						Number value = getLastStackPush(handle);
-						// System.out.println("ISTORE FOUND");
-						//bipush value every time you see iload until you see istore again.
-					}
-					// istore_0
-					if (handle.getInstruction().getOpcode() == 59) {
-						// System.out.println("ISTORE_0 FOUND");
-					}
-					// istore_1
-					if (handle.getInstruction().getOpcode() == 60) {
-						// System.out.println("ISTORE_1 FOUND");
-					}
-					// istore_2
-					if (handle.getInstruction().getOpcode() == 61) {
-						// System.out.println("ISTORE_2 FOUND");
-					}
-					// istore_3
-					if (handle.getInstruction().getOpcode() == 62) {
-						// System.out.println("ISTORE_3 FOUND");
-					}
 
-				}
-				else if (handle.getInstruction() instanceof FSTORE) {
-					// System.out.println("FSTORE FOUND");
-				}
-				else if (handle.getInstruction() instanceof DSTORE) {
-					// System.out.println("DSTORE FOUND");
-				}
-				else if (handle.getInstruction() instanceof LSTORE) {
-					// System.out.println("LSTORE FOUND");
-				}
-				else if (handle.getInstruction() instanceof ASTORE) {
-					// System.out.println("ASTORE FOUND");
-				}
-				else {
-					System.out.println("INVALID DATA FORMAT");
-				}
-				/*
-				InstructionHandle valueHolder = findLastStackPush(handle);
-				if (valueHolder.getInstruction() instanceof BIPUSH) {
-					System.out.println("ITS VALUE IS:" + ((BIPUSH)valueHolder.getInstruction()).getValue());
-					System.out.println(valueHolder);
-					System.out.println(handle);	
-				}	
-				else {
-					System.out.println("didnt find BIPUSH");
-					System.out.println(handle);
-				}*/		
-			}
+		for (InstructionHandle handle : instList.getInstructionHandles()) {
+			System.out.println(handle);
 		}
+
+		System.out.println("\n\n\n\n code starts from here!! \n\n\n\n");
+
+		
+		// // InstructionHandle is a wrapper for actual Instructions
+		// for (InstructionHandle handle : instList.getInstructionHandles())
+		// {
+		// 	System.out.println(handle);
+		// 	if (handle.getInstruction() instanceof StoreInstruction)
+		// 	{
+		// 		System.out.println("Found StoreInstruction!!!\n\n\n");
+		// 		if (handle.getInstruction() instanceof ISTORE) {	
+		// 			// istore
+		// 			if (handle.getInstruction().getOpcode() == 54){
+		// 				int value = (int) getLastStackPush(handle);
+		// 				System.out.println("SAM HERE 1");
+		// 				int istoreIndex = ((ISTORE)handle.getInstruction()).getIndex();
+		// 				System.out.println("SAM HERE 2");
+		// 				InstructionHandle handleNow = handle.getNext();
+		// 				System.out.println("SAM HERE 3");
+		// 				while (!(handleNow.getInstruction() instanceof ISTORE &&
+		// 					    ((ISTORE)handle.getInstruction()).getIndex() == istoreIndex) &&
+		// 					    handleNow != null) {
+		// 					System.out.println("SAM HERE 3.1");
+		// 					if (handleNow.getInstruction() instanceof ILOAD &&
+		// 					    ((ILOAD)handleNow.getInstruction()).getIndex() == istoreIndex) {
+		// 						System.out.println("SAM HERE 3.2");
+		// 						instList.insert(handleNow, new BIPUSH((byte)value));
+		// 						System.out.println("SAM HERE 3.3");
+		// 						try {
+		// 							System.out.println("SAM HERE 3.35");
+		// 							System.out.println("HANDLENOW: " + handleNow.getPrev());
+		// 							System.out.println("SAM HERE 3.4");
+
+		// 							handleNow = handleNow.getNext();
+		// 							InstructionHandle handleDelete = handleNow.getPrev();
+		// 							instList.delete(handleDelete);
+		// 							System.out.println("SAM HERE 3.5");
+		// 							// System.out.println(handleNow + "CHECKING");
+		// 						}
+		// 						catch(Exception e) {
+		// 							System.out.println("NPE FOUND");
+		// 						}
+		// 					}
+
+		// 					else {
+		// 						handleNow = handleNow.getNext();
+		// 					}
+		// 				}
+		// 				//bipush value every time you see iload until you see istore again.
+		// 			}
+
+
+		// 			// istore_0
+		// 			else if (handle.getInstruction().getOpcode() == 59){
+		// 			}
+		// 			// istore_1
+		// 			else if (handle.getInstruction().getOpcode() == 60){
+		// 			}
+		// 			// istore_2
+		// 			else if (handle.getInstruction().getOpcode() == 61){
+		// 			}
+		// 			// istore_3
+		// 			else if (handle.getInstruction().getOpcode() == 62){
+		// 			}
+		// 			else
+		// 			{
+		// 				System.out.println("INVALID INSTRUCTION");
+		// 			}
+
+		// 		}
+		// 		else if (handle.getInstruction() instanceof FSTORE) {
+
+		// 		}
+		// 		else if (handle.getInstruction() instanceof DSTORE) {	
+		// 		}
+		// 		else if (handle.getInstruction() instanceof LSTORE) {	
+		// 		}
+		// 		else if (handle.getInstruction() instanceof ASTORE) {	
+		// 		}
+		// 		else {
+		// 			System.out.println("INVALID INSTRUCTION");
+		// 		}
+		// 		/*
+		// 		InstructionHandle valueHolder = findLastStackPush(handle);
+		// 		if (valueHolder.getInstruction() instanceof BIPUSH) {
+		// 			System.out.println("ITS VALUE IS:" + ((BIPUSH)valueHolder.getInstruction()).getValue());
+		// 			System.out.println(valueHolder);
+		// 			System.out.println(handle);	
+		// 		}	
+		// 		else {
+		// 			System.out.println("didnt find BIPUSH");
+		// 			System.out.println(handle);
+		// 		}*/		
+		// 	}
+		// }
+
 
 		//System.console().readLine();
 
@@ -193,51 +245,54 @@ public class ConstantFolder
 
 	}
 
-	private Number getLastStackPush(InstructionHandle handle) {
-		do {
-			handle = handle.getPrev();
-			// System.out.println("THE HANDLE IS " + handle);
-		} while(handle.getPrev() != null && !stackChangingOp(handle));
+	private void handleBranchInstructions(InstructionList list, InstructionHandle handle, InstructionHandle newTarget) {
+		InstructionHandle currentHandle = handle;
+		while((currentHandle.getPrev() != null)) {
+			currentHandle = currentHandle.getPrev();
+			if(currentHandle.getInstruction() instanceof BranchInstruction) {
+				if(((BranchInstruction)currentHandle.getInstruction()).getTarget().equals(handle)) {
+					((BranchInstruction)currentHandle.getInstruction()).setTarget(newTarget);
+				}
+			}
+		}
+	}
 
-		if (handle.getInstruction() instanceof BIPUSH) {
-			return ((BIPUSH)handle.getInstruction()).getValue();
+	private Number getLastStackPush(InstructionHandle handle) {
+		InstructionHandle lastStackOp = handle;
+		do {
+			System.out.println("Currently looking at:");
+			System.out.println(lastStackOp);
+			lastStackOp = lastStackOp.getPrev();
+		} while(!(stackChangingOp(lastStackOp) || lastStackOp != null));
+
+
+		System.out.println("Previous Stack operation was : ");
+		System.out.println(lastStackOp);
+
+		if (lastStackOp.getInstruction() instanceof BIPUSH) {
+			return ((BIPUSH)lastStackOp.getInstruction()).getValue();
 		}
-		else if (handle.getInstruction() instanceof SIPUSH) {
-			return ((SIPUSH)handle.getInstruction()).getValue();
+		else if (lastStackOp.getInstruction() instanceof SIPUSH) {
+			return ((SIPUSH)lastStackOp.getInstruction()).getValue();
 		}
-		else if (handle.getInstruction() instanceof ICONST) {
-			return ((ICONST)handle.getInstruction()).getValue();
+		else if (lastStackOp.getInstruction() instanceof ICONST) {
+			return ((ICONST)lastStackOp.getInstruction()).getValue();
 		}
-		else if (handle.getInstruction() instanceof DCONST) {
-			return ((DCONST)handle.getInstruction()).getValue();
+		else if (lastStackOp.getInstruction() instanceof DCONST) {
+			return ((DCONST)lastStackOp.getInstruction()).getValue();
 		}
-		else if (handle.getInstruction() instanceof FCONST) {
-			return ((FCONST)handle.getInstruction()).getValue();
+		else if (lastStackOp.getInstruction() instanceof FCONST) {
+			return ((FCONST)lastStackOp.getInstruction()).getValue();
 		}
-		else if (handle.getInstruction() instanceof LCONST) {
-			return ((LCONST)handle.getInstruction()).getValue();
+		else if (lastStackOp.getInstruction() instanceof LCONST) {
+			return ((LCONST)lastStackOp.getInstruction()).getValue();
 		}
-		// if (handle.getInstruction() instanceof FCONST) {
-		// 	return handle;
-		// }
-		// if (handle.getInstruction() instanceof LCONST) {
-		// 	return handle;
-		// }
-		// if (handle.getInstruction() instanceof DCONST) {
-		// 	return handle;
-		// }
-		// if (handle.getInstruction() instanceof ICONST) {
-		// 	return handle;
-		// }
-		
+
 		return 0;
 	}
 
-	private boolean stackChangingOp(InstructionHandle handle) {
-		if (handle == null) {
-			return false;
-		}
-		else if (handle.getInstruction() instanceof ArithmeticInstruction &&
+	private Boolean stackChangingOp(InstructionHandle handle) {
+		if (handle.getInstruction() instanceof ArithmeticInstruction &&
 			     handle.getInstruction() instanceof BIPUSH &&
 			     handle.getInstruction() instanceof SIPUSH &&
 			     handle.getInstruction() instanceof LCONST &&
