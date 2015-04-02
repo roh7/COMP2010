@@ -94,145 +94,56 @@ public class ConstantFolder
 		}
 
 		InstructionHandle valueHolder;
-
 		
-		// Changes the iincs to 
-		// bipush value
-		// iload_i
-		// iadd
-		// istore_i
-		for (InstructionHandle handle : instList.getInstructionHandles()) {
+		// Changes the iincs to :
+		// bipush value, iload_i, iadd, istore_i.
+		for (InstructionHandle handle = instList.getStart(); handle != null; handle = handle.getNext()) {
 			if (handle.getInstruction() instanceof IINC) {
 				int incValue = ((IINC)handle.getInstruction()).getIncrement();
 				int index = ((IINC)handle.getInstruction()).getIndex();
-				System.out.println("IINC FOUND" + handle);
 				instList.insert(handle, new BIPUSH((byte)incValue));
-				
 				InstructionHandle incBipush = handle.getPrev();
-
 				instList.insert(handle, new ILOAD(index));
-				System.out.println(handle.getPrev());
 				instList.insert(handle, new IADD());
-				System.out.println(handle.getPrev());
 				instList.insert(handle, new ISTORE(index));
-				System.out.println(handle.getPrev());
 				try {
-					handleBranchInstructions(instList, handle, incBipush);
+					instList.redirectBranches(handle, incBipush);
 					instList.delete(handle);
 				}
 				catch(Exception e) {
 					// do nothing
 				}
+				instList.setPositions();
 			}
 		}
+		
 
-
+		System.out.println("\n\n\n\nCode after IINCS:");
 		for (InstructionHandle handle : instList.getInstructionHandles()) {
 			System.out.println(handle);
 		}
-
-		System.out.println("\n\n\n\n code starts from here!! \n\n\n\n");
-
+		System.out.println("\nTHATS ALL\n\n\n");
 		
-		// // InstructionHandle is a wrapper for actual Instructions
-		// for (InstructionHandle handle : instList.getInstructionHandles())
-		// {
-		// 	System.out.println(handle);
-		// 	if (handle.getInstruction() instanceof StoreInstruction)
-		// 	{
-		// 		System.out.println("Found StoreInstruction!!!\n\n\n");
-		// 		if (handle.getInstruction() instanceof ISTORE) {	
-		// 			// istore
-		// 			if (handle.getInstruction().getOpcode() == 54){
-		// 				int value = (int) getLastStackPush(handle);
-		// 				System.out.println("SAM HERE 1");
-		// 				int istoreIndex = ((ISTORE)handle.getInstruction()).getIndex();
-		// 				System.out.println("SAM HERE 2");
-		// 				InstructionHandle handleNow = handle.getNext();
-		// 				System.out.println("SAM HERE 3");
-		// 				while (!(handleNow.getInstruction() instanceof ISTORE &&
-		// 					    ((ISTORE)handle.getInstruction()).getIndex() == istoreIndex) &&
-		// 					    handleNow != null) {
-		// 					System.out.println("SAM HERE 3.1");
-		// 					if (handleNow.getInstruction() instanceof ILOAD &&
-		// 					    ((ILOAD)handleNow.getInstruction()).getIndex() == istoreIndex) {
-		// 						System.out.println("SAM HERE 3.2");
-		// 						instList.insert(handleNow, new BIPUSH((byte)value));
-		// 						System.out.println("SAM HERE 3.3");
-		// 						try {
-		// 							System.out.println("SAM HERE 3.35");
-		// 							System.out.println("HANDLENOW: " + handleNow.getPrev());
-		// 							System.out.println("SAM HERE 3.4");
+		System.out.println("\n\n\n\n optimising starts from here!!");
+		// InstructionHandle is a wrapper for actual Instructions
+		for (InstructionHandle handle = instList.getStart(); handle != null; handle = handle.getNext())
+		{
+			System.out.println(handle);
+			if (handle.getInstruction() instanceof StoreInstruction)
+			{
+				System.out.println("Found StoreInstruction!!!\n");
+				Number lastStackValue = getLastStackPush(instList, handle);
+				handleStoreInstructions(instList, handle, lastStackValue);
+			}
+		}
 
-		// 							handleNow = handleNow.getNext();
-		// 							InstructionHandle handleDelete = handleNow.getPrev();
-		// 							instList.delete(handleDelete);
-		// 							System.out.println("SAM HERE 3.5");
-		// 							// System.out.println(handleNow + "CHECKING");
-		// 						}
-		// 						catch(Exception e) {
-		// 							System.out.println("NPE FOUND");
-		// 						}
-		// 					}
-
-		// 					else {
-		// 						handleNow = handleNow.getNext();
-		// 					}
-		// 				}
-		// 				//bipush value every time you see iload until you see istore again.
-		// 			}
-
-
-		// 			// istore_0
-		// 			else if (handle.getInstruction().getOpcode() == 59){
-		// 			}
-		// 			// istore_1
-		// 			else if (handle.getInstruction().getOpcode() == 60){
-		// 			}
-		// 			// istore_2
-		// 			else if (handle.getInstruction().getOpcode() == 61){
-		// 			}
-		// 			// istore_3
-		// 			else if (handle.getInstruction().getOpcode() == 62){
-		// 			}
-		// 			else
-		// 			{
-		// 				System.out.println("INVALID INSTRUCTION");
-		// 			}
-
-		// 		}
-		// 		else if (handle.getInstruction() instanceof FSTORE) {
-
-		// 		}
-		// 		else if (handle.getInstruction() instanceof DSTORE) {	
-		// 		}
-		// 		else if (handle.getInstruction() instanceof LSTORE) {	
-		// 		}
-		// 		else if (handle.getInstruction() instanceof ASTORE) {	
-		// 		}
-		// 		else {
-		// 			System.out.println("INVALID INSTRUCTION");
-		// 		}
-		// 		/*
-		// 		InstructionHandle valueHolder = findLastStackPush(handle);
-		// 		if (valueHolder.getInstruction() instanceof BIPUSH) {
-		// 			System.out.println("ITS VALUE IS:" + ((BIPUSH)valueHolder.getInstruction()).getValue());
-		// 			System.out.println(valueHolder);
-		// 			System.out.println(handle);	
-		// 		}	
-		// 		else {
-		// 			System.out.println("didnt find BIPUSH");
-		// 			System.out.println(handle);
-		// 		}*/		
-		// 	}
-		// }
-
+		System.out.println("\n\n\n\nThis is the whole code\n\n\n\n");
+		for (InstructionHandle handle : instList.getInstructionHandles()) {
+			System.out.println(handle);
+		}
+		System.out.println("\n\n\ndone\n\n");
 
 		//System.console().readLine();
-
-		// // setPositions(true) checks whether jump handles 
-		// // are all within the current method
-		// instList.setPositions(true);
 
 		// // set max stack/local
 		// methodGen.setMaxStack();
@@ -245,23 +156,59 @@ public class ConstantFolder
 
 	}
 
-	private void handleBranchInstructions(InstructionList list, InstructionHandle handle, InstructionHandle newTarget) {
-		InstructionHandle currentHandle = handle;
-		while((currentHandle.getPrev() != null)) {
-			currentHandle = currentHandle.getPrev();
-			if(currentHandle.getInstruction() instanceof BranchInstruction) {
-				if(((BranchInstruction)currentHandle.getInstruction()).getTarget().equals(handle)) {
-					((BranchInstruction)currentHandle.getInstruction()).setTarget(newTarget);
+	private void handleStoreInstructions(InstructionList instList, InstructionHandle handle, Number lastStackValue) {
+
+		if (handle.getInstruction() instanceof ISTORE && lastStackValue != null) {	
+			int value = (int) lastStackValue;
+			int istoreIndex = ((ISTORE)handle.getInstruction()).getIndex();
+			InstructionHandle handleNow = handle.getNext();
+			
+			System.out.println("STATUS : looking for iloads");
+
+			while (handleNow != null &&
+					!(handleNow.getInstruction() instanceof ISTORE &&
+				    ((ISTORE)handle.getInstruction()).getIndex() == istoreIndex)) {
+				System.out.print("looking at instruction: ");
+				System.out.println(handleNow);
+				if (handleNow.getInstruction() instanceof ILOAD &&
+				    ((ILOAD)handleNow.getInstruction()).getIndex() == istoreIndex) {
+					System.out.println("the above instruction is a load");
+					instList.insert(handleNow, new BIPUSH((byte)value));
+					try {
+						handleNow = handleNow.getNext();
+						InstructionHandle handleDelete = handleNow.getPrev();
+						instList.redirectBranches(handleDelete, handleDelete.getPrev());
+						instList.delete(handleDelete);
+						instList.setPositions();
+					}
+					catch(Exception e) {
+						//do nothing
+					}
+				}
+				else {
+					handleNow = handleNow.getNext();
 				}
 			}
+			System.out.println("STATUS : Found Store Instruction and continuing with this instruciton");
+			System.out.println(handle);
+		}
+		else if (handle.getInstruction() instanceof FSTORE) {
+
+		}
+		else if (handle.getInstruction() instanceof DSTORE) {	
+		}
+		else if (handle.getInstruction() instanceof LSTORE) {	
+		}
+		else if (handle.getInstruction() instanceof ASTORE) {	
+		}
+		else {
+			System.out.println("INVALID INSTRUCTION");
 		}
 	}
 
-	private Number getLastStackPush(InstructionHandle handle) {
+	private Number getLastStackPush(InstructionList instList, InstructionHandle handle) {
 		InstructionHandle lastStackOp = handle;
 		do {
-			System.out.println("Currently looking at:");
-			System.out.println(lastStackOp);
 			lastStackOp = lastStackOp.getPrev();
 		} while(!(stackChangingOp(lastStackOp) || lastStackOp != null));
 
@@ -287,8 +234,63 @@ public class ConstantFolder
 		else if (lastStackOp.getInstruction() instanceof LCONST) {
 			return ((LCONST)lastStackOp.getInstruction()).getValue();
 		}
+		else if (lastStackOp.getInstruction() instanceof IADD) {
+			
+			System.out.println("So we found an ADD instruction looking for first number");
+			InstructionHandle firstInstruction = lastStackOp;
+			do {
+				firstInstruction = firstInstruction.getPrev();
+				System.out.println(firstInstruction);
+			} while(!(stackChangingOp(firstInstruction) || firstInstruction != null));
+			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
+			InstructionHandle secondInstruction = firstInstruction;
 
-		return 0;
+			System.out.println("First number found and is:" + firstNumber);
+			
+			
+
+			System.out.println("First Number handled looking for second one");
+
+			do {
+				secondInstruction = secondInstruction.getPrev();
+			} while(!(stackChangingOp(secondInstruction) || secondInstruction != null));
+			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
+			System.out.println("second number found and is:" + secondNumber);
+
+
+			// delete first instruction
+			if (firstNumber != null) {
+				instList.redirectBranches(firstInstruction, firstInstruction.getPrev());
+				try {
+					instList.delete(firstInstruction);
+				}
+				catch (Exception e) {
+					// do nothing
+				}
+			}
+			else {
+				return null;
+			}
+
+			// delete second instruction
+			if (secondNumber != null) {
+				instList.redirectBranches(secondInstruction, secondInstruction.getPrev());
+				try {
+					instList.delete(secondInstruction);
+				}
+				catch (Exception e) {
+					// do nothing
+				}
+			}
+			else {
+				return null;
+			}
+
+			return ((int)firstNumber + (int)secondNumber);
+		}
+
+		return null;
 	}
 
 	private Boolean stackChangingOp(InstructionHandle handle) {
