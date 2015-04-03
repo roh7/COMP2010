@@ -1,3 +1,8 @@
+/*
+* IGNORING NEG, OR, REM, SHL, SHR, USHR, XOR
+*
+*
+*/
 package comp2010.main;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -42,6 +47,30 @@ import org.apache.bcel.generic.LCONST;
 import org.apache.bcel.generic.IINC;
 import org.apache.bcel.generic.IADD;
 import org.apache.bcel.generic.ILOAD;
+import org.apache.bcel.generic.FLOAD;
+import org.apache.bcel.generic.DLOAD;
+import org.apache.bcel.generic.LLOAD;
+import org.apache.bcel.generic.IMUL;
+import org.apache.bcel.generic.ISUB;
+import org.apache.bcel.generic.IREM;
+import org.apache.bcel.generic.IDIV;
+import org.apache.bcel.generic.FADD;
+import org.apache.bcel.generic.FMUL;
+import org.apache.bcel.generic.FSUB;
+import org.apache.bcel.generic.FREM;
+import org.apache.bcel.generic.FDIV;
+import org.apache.bcel.generic.DADD;
+import org.apache.bcel.generic.DMUL;
+import org.apache.bcel.generic.DSUB;
+import org.apache.bcel.generic.DREM;
+import org.apache.bcel.generic.DDIV;
+import org.apache.bcel.generic.LADD;
+import org.apache.bcel.generic.LMUL;
+import org.apache.bcel.generic.LSUB;
+import org.apache.bcel.generic.LREM;
+import org.apache.bcel.generic.LDIV;
+import org.apache.bcel.generic.DCMPG;
+import org.apache.bcel.generic.DCMPL;
 import org.apache.bcel.generic.BranchInstruction;
 
 import org.apache.bcel.generic.LocalVariableInstruction;
@@ -130,8 +159,32 @@ public class ConstantFolder
 				handle = handle.getNext();
 			}
 		}
-
-
+      
+      // After this step we need to fold all non variable arithmetic instructions
+      // foo(4+5) --> foo(9)
+      /*
+      for (InstructionHandle handle = instList.getStart(); handle != null;)
+		{
+			System.out.println(handle);
+			if (handle.getInstruction() instanceof ArithmeticInstruction)
+			{
+				System.out.println("Found ArithmeticInstruction!!!\n");
+				Number lastStackValue = getLastStackPush(instList, handle);
+				if (handleStoreInstructions(instList, handle, lastStackValue)) {
+					InstructionHandle handleDelete = handle;
+					handle = handle.getNext();
+					safeInstructionDelete(instList, handleDelete);
+					instList.setPositions();
+				}	
+				else{
+					handle = handle.getNext();
+				}
+			}
+			else {
+				handle = handle.getNext();
+			}
+		}
+		*/
 
 		System.out.println("\n\n\n\nThis is the whole code\n\n\n\n");
 		for (InstructionHandle handle : instList.getInstructionHandles()) {
@@ -154,7 +207,8 @@ public class ConstantFolder
 
 			while (handleNow != null &&
 					!(handleNow.getInstruction() instanceof ISTORE &&
-				    ((ISTORE)handle.getInstruction()).getIndex() == istoreIndex && handle.getInstruction().getOpcode() == handleNow.getInstruction().getOpcode())) {
+				    ((ISTORE)handle.getInstruction()).getIndex() == istoreIndex 
+				    && handle.getInstruction().getOpcode() == handleNow.getInstruction().getOpcode())) {
 				
 				System.out.print("looking at instruction: ");
 				System.out.println(handleNow);
@@ -188,8 +242,51 @@ public class ConstantFolder
 			System.out.println("found corresponding i store and giong out ");
 			return true;
 		}
-		else if (handle.getInstruction() instanceof FSTORE) {
+      
+      
+		else if (handle.getInstruction() instanceof FSTORE && lastStackValue != null) {
+          	float value = (float) lastStackValue;
+			int fstoreIndex = ((FSTORE)handle.getInstruction()).getIndex();
+			InstructionHandle handleNow = handle.getNext();
+			
+			System.out.println("STATUS : looking for floads");
 
+			while (handleNow != null &&
+					!(handleNow.getInstruction() instanceof FSTORE &&
+				    ((FSTORE)handle.getInstruction()).getIndex() == fstoreIndex 
+				    && handle.getInstruction().getOpcode() == handleNow.getInstruction().getOpcode())) {
+				
+				System.out.print("looking at instruction: ");
+				System.out.println(handleNow);
+
+				if (handleNow.getInstruction() instanceof FLOAD &&
+				    ((FLOAD)handleNow.getInstruction()).getIndex() == fstoreIndex) {
+					System.out.println("the above instruction is a load and will be changed to bipush");
+					instList.insert(handleNow, new BIPUSH((byte)value));
+					instList.setPositions();
+					try {
+						handleNow = handleNow.getNext();
+						InstructionHandle handleDelete = handleNow.getPrev();
+						instList.redirectBranches(handleDelete, handleDelete.getPrev());
+						instList.delete(handleDelete);
+						instList.setPositions();
+					}
+					catch(Exception e) {
+						//do nothing
+					}
+					System.out.println("This is how it looks now");
+                    for (InstructionHandle hand : instList.getInstructionHandles()) {
+                        System.out.println(hand);
+                    }
+				}
+				else {
+					handleNow = handleNow.getNext();
+				}
+				
+			}
+			System.out.println(handle);
+			System.out.println("found corresponding f store and giong out ");
+			return true;
 		}
 		else if (handle.getInstruction() instanceof DSTORE) {	
 		}
@@ -268,38 +365,727 @@ public class ConstantFolder
 
 
 			// delete first instruction
-			if (firstNumber != null) {
-				/*instList.redirectBranches(firstInstruction, firstInstruction.getPrev());
-				try {
-					instList.delete(firstInstruction);
-				}
-				catch (Exception e) {
-					// do nothing
-				}*/
-			}
-			else {
-				return null;
-			}
-
-			// delete second instruction
-			if (secondNumber != null) {
-				/*
-				instList.redirectBranches(secondInstruction, secondInstruction.getPrev());
-				try {
-					instList.delete(secondInstruction);
-				}
-				catch (Exception e) {
-					// do nothing
-				}*/
-			}
-			else {
+			if (firstNumber == null || secondNumber == null) {
 				return null;
 			}
 
 			safeInstructionDelete(instList, lastStackOp);
 			return ((int)firstNumber + (int)secondNumber);
 		}
+      
+      	else if (lastStackOp.getInstruction() instanceof IMUL) {
+			
+			System.out.println("So we found an MUL instruction looking for first number");
+			
+			InstructionHandle firstInstruction = lastStackOp.getPrev();
+			while(!(stackChangingOp(firstInstruction) || firstInstruction != null)){
+				firstInstruction = firstInstruction.getPrev();
+			} 
+			InstructionHandle secondInstruction = firstInstruction.getPrev();
+			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
+			
+			System.out.println("First number found and is:" + firstNumber);
 
+			System.out.println("First number handled looking for second one");
+
+			while(!(stackChangingOp(secondInstruction) || secondInstruction != null)){
+				System.out.println("SAM");
+				secondInstruction = secondInstruction.getPrev();
+			}
+			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
+			System.out.println("second number found and is:" + secondNumber);
+
+
+			// delete first instruction
+			if (firstNumber == null || secondNumber == null) {
+				return null;
+			}
+
+			safeInstructionDelete(instList, lastStackOp);
+			return ((int)firstNumber * (int)secondNumber);
+		}
+
+		
+      	else if (lastStackOp.getInstruction() instanceof IDIV) {
+			
+			System.out.println("So we found an DIV instruction looking for first number");
+			
+			InstructionHandle firstInstruction = lastStackOp.getPrev();
+			while(!(stackChangingOp(firstInstruction) || firstInstruction != null)){
+				firstInstruction = firstInstruction.getPrev();
+			} 
+			InstructionHandle secondInstruction = firstInstruction.getPrev();
+			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
+			
+			System.out.println("First number found and is:" + firstNumber);
+
+			System.out.println("First number handled looking for second one");
+
+			while(!(stackChangingOp(secondInstruction) || secondInstruction != null)){
+				System.out.println("SAM");
+				secondInstruction = secondInstruction.getPrev();
+			}
+			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
+			System.out.println("second number found and is:" + secondNumber);
+
+
+			// delete first instruction
+			if (firstNumber == null || secondNumber == null) {
+				return null;
+			}
+
+			safeInstructionDelete(instList, lastStackOp);
+			return ((int)secondNumber / (int)firstNumber);
+		}
+      
+        else if (lastStackOp.getInstruction() instanceof ISUB) {
+			
+			System.out.println("So we found an SUB instruction looking for first number");
+			
+			InstructionHandle firstInstruction = lastStackOp.getPrev();
+			while(!(stackChangingOp(firstInstruction) || firstInstruction != null)){
+				firstInstruction = firstInstruction.getPrev();
+			} 
+			InstructionHandle secondInstruction = firstInstruction.getPrev();
+			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
+			
+			System.out.println("First number found and is:" + firstNumber);
+
+			System.out.println("First number handled looking for second one");
+
+			while(!(stackChangingOp(secondInstruction) || secondInstruction != null)){
+				System.out.println("SAM");
+				secondInstruction = secondInstruction.getPrev();
+			}
+			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
+			System.out.println("second number found and is:" + secondNumber);
+
+
+			// delete first instruction
+			if (firstNumber == null || secondNumber == null) {
+				return null;
+			}
+
+			safeInstructionDelete(instList, lastStackOp);
+			return ((int)secondNumber - (int)firstNumber);
+		}
+      
+        else if (lastStackOp.getInstruction() instanceof IREM) {
+			
+			System.out.println("So we found an REM instruction looking for first number");
+			
+			InstructionHandle firstInstruction = lastStackOp.getPrev();
+			while(!(stackChangingOp(firstInstruction) || firstInstruction != null)){
+				firstInstruction = firstInstruction.getPrev();
+			} 
+			InstructionHandle secondInstruction = firstInstruction.getPrev();
+			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
+			
+			System.out.println("First number found and is:" + firstNumber);
+
+			System.out.println("First number handled looking for second one");
+
+			while(!(stackChangingOp(secondInstruction) || secondInstruction != null)){
+				System.out.println("SAM");
+				secondInstruction = secondInstruction.getPrev();
+			}
+			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
+			System.out.println("second number found and is:" + secondNumber);
+
+
+			// delete first instruction
+			if (firstNumber == null || secondNumber == null) {
+				return null;
+			}
+
+			safeInstructionDelete(instList, lastStackOp);
+			return ((int)secondNumber % (int)firstNumber);
+		}
+      
+        else if (lastStackOp.getInstruction() instanceof LADD) {
+			
+			System.out.println("So we found an ADD instruction looking for first number");
+			
+			InstructionHandle firstInstruction = lastStackOp.getPrev();
+			while(!(stackChangingOp(firstInstruction) || firstInstruction != null)){
+				firstInstruction = firstInstruction.getPrev();
+			} 
+			InstructionHandle secondInstruction = firstInstruction.getPrev();
+			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
+			
+			System.out.println("First number found and is:" + firstNumber);
+
+			System.out.println("First number handled looking for second one");
+
+			while(!(stackChangingOp(secondInstruction) || secondInstruction != null)){
+				System.out.println("SAM");
+				secondInstruction = secondInstruction.getPrev();
+			}
+			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
+			System.out.println("second number found and is:" + secondNumber);
+
+
+			// delete first instruction
+			if (firstNumber == null || secondNumber == null) {
+				return null;
+			}
+
+			safeInstructionDelete(instList, lastStackOp);
+			return ((long)firstNumber + (long)secondNumber);
+		}
+      
+      	else if (lastStackOp.getInstruction() instanceof LMUL) {
+			
+			System.out.println("So we found an MUL instruction looking for first number");
+			
+			InstructionHandle firstInstruction = lastStackOp.getPrev();
+			while(!(stackChangingOp(firstInstruction) || firstInstruction != null)){
+				firstInstruction = firstInstruction.getPrev();
+			} 
+			InstructionHandle secondInstruction = firstInstruction.getPrev();
+			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
+			
+			System.out.println("First number found and is:" + firstNumber);
+
+			System.out.println("First number handled looking for second one");
+
+			while(!(stackChangingOp(secondInstruction) || secondInstruction != null)){
+				System.out.println("SAM");
+				secondInstruction = secondInstruction.getPrev();
+			}
+			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
+			System.out.println("second number found and is:" + secondNumber);
+
+
+			// delete first instruction
+			if (firstNumber == null || secondNumber == null) {
+				return null;
+			}
+
+			safeInstructionDelete(instList, lastStackOp);
+			return ((long)firstNumber * (long)secondNumber);
+		}
+
+		
+      	else if (lastStackOp.getInstruction() instanceof LDIV) {
+			
+			System.out.println("So we found an DIV instruction looking for first number");
+			
+			InstructionHandle firstInstruction = lastStackOp.getPrev();
+			while(!(stackChangingOp(firstInstruction) || firstInstruction != null)){
+				firstInstruction = firstInstruction.getPrev();
+			} 
+			InstructionHandle secondInstruction = firstInstruction.getPrev();
+			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
+			
+			System.out.println("First number found and is:" + firstNumber);
+
+			System.out.println("First number handled looking for second one");
+
+			while(!(stackChangingOp(secondInstruction) || secondInstruction != null)){
+				System.out.println("SAM");
+				secondInstruction = secondInstruction.getPrev();
+			}
+			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
+			System.out.println("second number found and is:" + secondNumber);
+
+
+			// delete first instruction
+			if (firstNumber == null || secondNumber == null) {
+				return null;
+			}
+
+			safeInstructionDelete(instList, lastStackOp);
+			return ((long)secondNumber / (long)firstNumber);
+		}
+      
+        else if (lastStackOp.getInstruction() instanceof LSUB) {
+			
+			System.out.println("So we found an SUB instruction looking for first number");
+			
+			InstructionHandle firstInstruction = lastStackOp.getPrev();
+			while(!(stackChangingOp(firstInstruction) || firstInstruction != null)){
+				firstInstruction = firstInstruction.getPrev();
+			} 
+			InstructionHandle secondInstruction = firstInstruction.getPrev();
+			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
+			
+			System.out.println("First number found and is:" + firstNumber);
+
+			System.out.println("First number handled looking for second one");
+
+			while(!(stackChangingOp(secondInstruction) || secondInstruction != null)){
+				System.out.println("SAM");
+				secondInstruction = secondInstruction.getPrev();
+			}
+			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
+			System.out.println("second number found and is:" + secondNumber);
+
+
+			// delete first instruction
+			if (firstNumber == null || secondNumber == null) {
+				return null;
+			}
+
+			safeInstructionDelete(instList, lastStackOp);
+			return ((long)secondNumber - (long)firstNumber);
+		}
+      
+        else if (lastStackOp.getInstruction() instanceof LREM) {
+			
+			System.out.println("So we found an REM instruction looking for first number");
+			
+			InstructionHandle firstInstruction = lastStackOp.getPrev();
+			while(!(stackChangingOp(firstInstruction) || firstInstruction != null)){
+				firstInstruction = firstInstruction.getPrev();
+			} 
+			InstructionHandle secondInstruction = firstInstruction.getPrev();
+			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
+			
+			System.out.println("First number found and is:" + firstNumber);
+
+			System.out.println("First number handled looking for second one");
+
+			while(!(stackChangingOp(secondInstruction) || secondInstruction != null)){
+				System.out.println("SAM");
+				secondInstruction = secondInstruction.getPrev();
+			}
+			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
+			System.out.println("second number found and is:" + secondNumber);
+
+
+			// delete first instruction
+			if (firstNumber == null || secondNumber == null) {
+				return null;
+			}
+
+			safeInstructionDelete(instList, lastStackOp);
+			return ((long)secondNumber % (long)firstNumber);
+		}
+      
+        else if (lastStackOp.getInstruction() instanceof FADD) {
+			
+			System.out.println("So we found an ADD instruction looking for first number");
+			
+			InstructionHandle firstInstruction = lastStackOp.getPrev();
+			while(!(stackChangingOp(firstInstruction) || firstInstruction != null)){
+				firstInstruction = firstInstruction.getPrev();
+			} 
+			InstructionHandle secondInstruction = firstInstruction.getPrev();
+			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
+			
+			System.out.println("First number found and is:" + firstNumber);
+
+			System.out.println("First number handled looking for second one");
+
+			while(!(stackChangingOp(secondInstruction) || secondInstruction != null)){
+				System.out.println("SAM");
+				secondInstruction = secondInstruction.getPrev();
+			}
+			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
+			System.out.println("second number found and is:" + secondNumber);
+
+
+			// delete first instruction
+			if (firstNumber == null || secondNumber == null) {
+				return null;
+			}
+
+			safeInstructionDelete(instList, lastStackOp);
+			return ((float)firstNumber + (float)secondNumber);
+		}
+      
+      	else if (lastStackOp.getInstruction() instanceof FMUL) {
+			
+			System.out.println("So we found an MUL instruction looking for first number");
+			
+			InstructionHandle firstInstruction = lastStackOp.getPrev();
+			while(!(stackChangingOp(firstInstruction) || firstInstruction != null)){
+				firstInstruction = firstInstruction.getPrev();
+			} 
+			InstructionHandle secondInstruction = firstInstruction.getPrev();
+			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
+			
+			System.out.println("First number found and is:" + firstNumber);
+
+			System.out.println("First number handled looking for second one");
+
+			while(!(stackChangingOp(secondInstruction) || secondInstruction != null)){
+				System.out.println("SAM");
+				secondInstruction = secondInstruction.getPrev();
+			}
+			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
+			System.out.println("second number found and is:" + secondNumber);
+
+
+			// delete first instruction
+			if (firstNumber == null || secondNumber == null) {
+				return null;
+			}
+
+			safeInstructionDelete(instList, lastStackOp);
+			return ((float)firstNumber * (float)secondNumber);
+		}
+
+		
+      	else if (lastStackOp.getInstruction() instanceof FDIV) {
+			
+			System.out.println("So we found an DIV instruction looking for first number");
+			
+			InstructionHandle firstInstruction = lastStackOp.getPrev();
+			while(!(stackChangingOp(firstInstruction) || firstInstruction != null)){
+				firstInstruction = firstInstruction.getPrev();
+			} 
+			InstructionHandle secondInstruction = firstInstruction.getPrev();
+			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
+			
+			System.out.println("First number found and is:" + firstNumber);
+
+			System.out.println("First number handled looking for second one");
+
+			while(!(stackChangingOp(secondInstruction) || secondInstruction != null)){
+				System.out.println("SAM");
+				secondInstruction = secondInstruction.getPrev();
+			}
+			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
+			System.out.println("second number found and is:" + secondNumber);
+
+
+			// delete first instruction
+			if (firstNumber == null || secondNumber == null) {
+				return null;
+			}
+
+			safeInstructionDelete(instList, lastStackOp);
+			return ((float)secondNumber / (float)firstNumber);
+		}
+      
+        else if (lastStackOp.getInstruction() instanceof FSUB) {
+			
+			System.out.println("So we found an SUB instruction looking for first number");
+			
+			InstructionHandle firstInstruction = lastStackOp.getPrev();
+			while(!(stackChangingOp(firstInstruction) || firstInstruction != null)){
+				firstInstruction = firstInstruction.getPrev();
+			} 
+			InstructionHandle secondInstruction = firstInstruction.getPrev();
+			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
+			
+			System.out.println("First number found and is:" + firstNumber);
+
+			System.out.println("First number handled looking for second one");
+
+			while(!(stackChangingOp(secondInstruction) || secondInstruction != null)){
+				System.out.println("SAM");
+				secondInstruction = secondInstruction.getPrev();
+			}
+			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
+			System.out.println("second number found and is:" + secondNumber);
+
+
+			// delete first instruction
+			if (firstNumber == null || secondNumber == null) {
+				return null;
+			}
+
+			safeInstructionDelete(instList, lastStackOp);
+			return ((float)secondNumber - (float)firstNumber);
+		}
+      
+        else if (lastStackOp.getInstruction() instanceof FREM) {
+			
+			System.out.println("So we found an REM instruction looking for first number");
+			
+			InstructionHandle firstInstruction = lastStackOp.getPrev();
+			while(!(stackChangingOp(firstInstruction) || firstInstruction != null)){
+				firstInstruction = firstInstruction.getPrev();
+			} 
+			InstructionHandle secondInstruction = firstInstruction.getPrev();
+			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
+			
+			System.out.println("First number found and is:" + firstNumber);
+
+			System.out.println("First number handled looking for second one");
+
+			while(!(stackChangingOp(secondInstruction) || secondInstruction != null)){
+				System.out.println("SAM");
+				secondInstruction = secondInstruction.getPrev();
+			}
+			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
+			System.out.println("second number found and is:" + secondNumber);
+
+
+			// delete first instruction
+			if (firstNumber == null || secondNumber == null) {
+				return null;
+			}
+
+			safeInstructionDelete(instList, lastStackOp);
+			return ((float)secondNumber % (float)firstNumber);
+		}
+      
+        else if (lastStackOp.getInstruction() instanceof DADD) {
+			
+			System.out.println("So we found an ADD instruction looking for first number");
+			
+			InstructionHandle firstInstruction = lastStackOp.getPrev();
+			while(!(stackChangingOp(firstInstruction) || firstInstruction != null)){
+				firstInstruction = firstInstruction.getPrev();
+			} 
+			InstructionHandle secondInstruction = firstInstruction.getPrev();
+			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
+			
+			System.out.println("First number found and is:" + firstNumber);
+
+			System.out.println("First number handled looking for second one");
+
+			while(!(stackChangingOp(secondInstruction) || secondInstruction != null)){
+				System.out.println("SAM");
+				secondInstruction = secondInstruction.getPrev();
+			}
+			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
+			System.out.println("second number found and is:" + secondNumber);
+
+
+			// delete first instruction
+			if (firstNumber == null || secondNumber == null) {
+				return null;
+			}
+
+			safeInstructionDelete(instList, lastStackOp);
+			return ((double)firstNumber + (double)secondNumber);
+		}
+      
+      	else if (lastStackOp.getInstruction() instanceof DMUL) {
+			
+			System.out.println("So we found an MUL instruction looking for first number");
+			
+			InstructionHandle firstInstruction = lastStackOp.getPrev();
+			while(!(stackChangingOp(firstInstruction) || firstInstruction != null)){
+				firstInstruction = firstInstruction.getPrev();
+			} 
+			InstructionHandle secondInstruction = firstInstruction.getPrev();
+			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
+			
+			System.out.println("First number found and is:" + firstNumber);
+
+			System.out.println("First number handled looking for second one");
+
+			while(!(stackChangingOp(secondInstruction) || secondInstruction != null)){
+				System.out.println("SAM");
+				secondInstruction = secondInstruction.getPrev();
+			}
+			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
+			System.out.println("second number found and is:" + secondNumber);
+
+
+			// delete first instruction
+			if (firstNumber == null || secondNumber == null) {
+				return null;
+			}
+
+			safeInstructionDelete(instList, lastStackOp);
+			return ((double)firstNumber * (double)secondNumber);
+		}
+
+		
+      	else if (lastStackOp.getInstruction() instanceof DDIV) {
+			
+			System.out.println("So we found an DIV instruction looking for first number");
+			
+			InstructionHandle firstInstruction = lastStackOp.getPrev();
+			while(!(stackChangingOp(firstInstruction) || firstInstruction != null)){
+				firstInstruction = firstInstruction.getPrev();
+			} 
+			InstructionHandle secondInstruction = firstInstruction.getPrev();
+			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
+			
+			System.out.println("First number found and is:" + firstNumber);
+
+			System.out.println("First number handled looking for second one");
+
+			while(!(stackChangingOp(secondInstruction) || secondInstruction != null)){
+				System.out.println("SAM");
+				secondInstruction = secondInstruction.getPrev();
+			}
+			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
+			System.out.println("second number found and is:" + secondNumber);
+
+
+			// delete first instruction
+			if (firstNumber == null || secondNumber == null) {
+				return null;
+			}
+
+			safeInstructionDelete(instList, lastStackOp);
+			return ((double)secondNumber / (double)firstNumber);
+		}
+      
+        else if (lastStackOp.getInstruction() instanceof DSUB) {
+			
+			System.out.println("So we found an SUB instruction looking for first number");
+			
+			InstructionHandle firstInstruction = lastStackOp.getPrev();
+			while(!(stackChangingOp(firstInstruction) || firstInstruction != null)){
+				firstInstruction = firstInstruction.getPrev();
+			} 
+			InstructionHandle secondInstruction = firstInstruction.getPrev();
+			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
+			
+			System.out.println("First number found and is:" + firstNumber);
+
+			System.out.println("First number handled looking for second one");
+
+			while(!(stackChangingOp(secondInstruction) || secondInstruction != null)){
+				System.out.println("SAM");
+				secondInstruction = secondInstruction.getPrev();
+			}
+			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
+			System.out.println("second number found and is:" + secondNumber);
+
+
+			// delete first instruction
+			if (firstNumber == null || secondNumber == null) {
+				return null;
+			}
+
+			safeInstructionDelete(instList, lastStackOp);
+			return ((double)secondNumber - (double)firstNumber);
+		}
+      
+        else if (lastStackOp.getInstruction() instanceof DREM) {
+			
+			System.out.println("So we found an REM instruction looking for first number");
+			
+			InstructionHandle firstInstruction = lastStackOp.getPrev();
+			while(!(stackChangingOp(firstInstruction) || firstInstruction != null)){
+				firstInstruction = firstInstruction.getPrev();
+			} 
+			InstructionHandle secondInstruction = firstInstruction.getPrev();
+			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
+			
+			System.out.println("First number found and is:" + firstNumber);
+
+			System.out.println("First number handled looking for second one");
+
+			while(!(stackChangingOp(secondInstruction) || secondInstruction != null)){
+				System.out.println("SAM");
+				secondInstruction = secondInstruction.getPrev();
+			}
+			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
+			System.out.println("second number found and is:" + secondNumber);
+
+
+			// delete first instruction
+			if (firstNumber == null || secondNumber == null) {
+				return null;
+			}
+
+			safeInstructionDelete(instList, lastStackOp);
+			return ((double)secondNumber % (double)firstNumber);
+		}
+      
+        else if (lastStackOp.getInstruction() instanceof DCMPG) {
+			
+			System.out.println("So we found an CMPG instruction looking for first number");
+			
+			InstructionHandle firstInstruction = lastStackOp.getPrev();
+			while(!(stackChangingOp(firstInstruction) || firstInstruction != null)){
+				firstInstruction = firstInstruction.getPrev();
+			} 
+			InstructionHandle secondInstruction = firstInstruction.getPrev();
+			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
+			
+			System.out.println("First number found and is:" + firstNumber);
+
+			System.out.println("First number handled looking for second one");
+
+			while(!(stackChangingOp(secondInstruction) || secondInstruction != null)){
+				System.out.println("SAM");
+				secondInstruction = secondInstruction.getPrev();
+			}
+			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
+			System.out.println("second number found and is:" + secondNumber);
+
+
+			// delete first instruction
+			if (firstNumber == null || secondNumber == null) {
+				return null;
+			}
+
+			safeInstructionDelete(instList, lastStackOp);
+          if ((double)secondNumber == (double)firstNumber) {
+          	return 0;
+          }
+          else if ((double)secondNumber > (double)firstNumber) {
+            return 1;
+          }
+          else {
+            return -1;
+          }
+		}
+      
+      	else if (lastStackOp.getInstruction() instanceof DCMPL) {
+			
+			System.out.println("So we found an CMPL instruction looking for first number");
+			
+			InstructionHandle firstInstruction = lastStackOp.getPrev();
+			while(!(stackChangingOp(firstInstruction) || firstInstruction != null)){
+				firstInstruction = firstInstruction.getPrev();
+			} 
+			InstructionHandle secondInstruction = firstInstruction.getPrev();
+			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
+			
+			System.out.println("First number found and is:" + firstNumber);
+
+			System.out.println("First number handled looking for second one");
+
+			while(!(stackChangingOp(secondInstruction) || secondInstruction != null)){
+				System.out.println("SAM");
+				secondInstruction = secondInstruction.getPrev();
+			}
+			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
+			System.out.println("second number found and is:" + secondNumber);
+
+
+			// delete first instruction
+			if (firstNumber == null || secondNumber == null) {
+				return null;
+			}
+
+			safeInstructionDelete(instList, lastStackOp);
+          if ((double)secondNumber == (double)firstNumber) {
+          	return 0;
+          }
+          else if ((double)secondNumber < (double)firstNumber) {
+            return 1;
+          }
+          else {
+            return -1;
+          }
+		}
+      
 		return null;
 	}
 
@@ -390,3 +1176,43 @@ public class ConstantFolder
 		}
 	}
 }
+
+
+/*
+
+		int i = 1;
+        i = 1 << 10;
+        int j = i + 3;
+        i = j + 4;
+        j = i / 5;
+        return i * j;
+        
+        	   0: bipush[16](2) 11
+     [java]    2: bipush[16](2) 2
+     [java]    4: imul[104](1)
+     [java]    5: ireturn[172](1)
+
+				0: iconst_1[4](1)
+     [java]    1: istore_1[60](1)
+     [java]    2: iconst_0[3](1)
+     [java]    3: istore_1[60](1)
+     [java]    4: iload_1[27](1)
+     [java]    5: iconst_3[6](1)
+     [java]    6: iadd[96](1)
+     [java]    7: istore_2[61](1)
+     [java]    8: iload_2[28](1)
+     [java]    9: iconst_4[7](1)
+     [java]   10: iadd[96](1)
+     [java]   11: istore_1[60](1)
+     [java]   12: iload_1[27](1)
+     [java]   13: iconst_5[8](1)
+     [java]   14: idiv[108](1)
+     [java]   15: istore_2[61](1)
+     [java]   16: iload_1[27](1)
+     [java]   17: iload_2[28](1)
+     [java]   18: imul[104](1)
+     [java]   19: ireturn[172](1)
+
+i = 1 << 2;
+	System.out.println(12 << 3);
+*/
