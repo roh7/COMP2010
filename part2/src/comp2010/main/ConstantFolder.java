@@ -173,371 +173,78 @@ public class ConstantFolder {
 				safeInstructionDelete(instList, handleDelete);
 				instList.setPositions();
 			}
-			/*else if (handle.getInstruction() instanceof IfInstruction){
-            	
-            if (ifHandler(instList, handle)) {
-                    InstructionHandle handleDelete = handle;
-					handle = handle.getNext();
-					safeInstructionDelete(instList, handleDelete);
-					instList.setPositions();
-                  }
-                  else {
-                    handle = handle.getNext();
-                  }
-          }*/
-
 			else {
 				handle = handle.getNext();
 			}
 		}
 
-		// After this step we need to fold all non variable arithmetic instructions
-		// foo(4+5) --> foo(9)
-		/*
+		System.out.println("SAMSAMSMAS***FOO***SAMSAMASMSM");
+
       for (InstructionHandle handle = instList.getStart(); handle != null;)
 		{
-			System.out.println(handle);
-			if (handle.getInstruction() instanceof ArithmeticInstruction)
-			{
+        
+        	System.out.println(handle);
+        
+        
+	        if (handle.getInstruction() instanceof ArithmeticInstruction)
+	        {
 				System.out.println("Found ArithmeticInstruction!!!\n");
-				Number lastStackValue = getLastStackPush(instList, handle);
-				if (handleStoreInstructions(instList, handle, lastStackValue)) {
-					InstructionHandle handleDelete = handle;
-					handle = handle.getNext();
-					safeInstructionDelete(instList, handleDelete);
-					instList.setPositions();
-				}	
-				else{
-					handle = handle.getNext();
-				}
-			}
-			else {
+				InstructionHandle toHandle = handle.getNext();
 				handle = handle.getNext();
-			}
+				Number lastStackValue = getLastStackPush(instList, toHandle);
+	          	
+	          if (lastStackValue != null) {
+	            System.out.println(lastStackValue);
+	          	int constantIndex = 0;
+	          	if (lastStackValue instanceof Integer) {
+	          		constantIndex = myCPGen.addInteger((int) lastStackValue);
+					instList.insert(handle, new LDC(constantIndex));
+					instList.setPositions();
+				}
+	          	if (lastStackValue instanceof Float) {
+	          		constantIndex = myCPGen.addFloat((float) lastStackValue);
+					instList.insert(handle, new LDC(constantIndex));
+					instList.setPositions();
+				}
+	          	if (lastStackValue instanceof Double) {
+	          		constantIndex = myCPGen.addDouble((double) lastStackValue);
+					instList.insert(handle, new LDC(constantIndex));
+					instList.setPositions();
+				}
+	          	if (lastStackValue instanceof Long) {
+	          		constantIndex = myCPGen.addLong((Long) lastStackValue);
+					instList.insert(handle, new LDC(constantIndex));
+					instList.setPositions();
+				}
+	          }
+
+	      }
+	          else {
+	          	handle = handle.getNext();
+	          	instList.setPositions();
+	          }
+
 		}
-		*/
+		
 
 		System.out.println("\n\n\n\nThis is the whole code\n\n\n\n");
 		for (InstructionHandle handle: instList.getInstructionHandles()) {
+			if (handle.getInstruction() instanceof LDC) { 
+
+				LDC ldc = (LDC) handle.getInstruction();
+				//Number value = (Number)ldc.getValue(myCPGen);
+			System.out.println("Value of the following LDC is: ");
+			System.out.println(ldc.getValue(myCPGen));
+		}
 			System.out.println(handle);
 		}
 		System.out.println("\n\n\ndone\n\n");
 
 	}
 
-	/*private boolean ifHandler(InstructionList instList, InstructionHandle handle) {
-      
-      			if (handle.getInstruction() instanceof IF_ICMPEQ) {
-		
-					System.out.println("So we found an IF_ICMPEQ instruction looking for first number");
-			
-					InstructionHandle firstInstruction = handle.getPrev();
-					while(!(stackChangingOp(firstInstruction) || firstInstruction != null)){
-						firstInstruction = firstInstruction.getPrev();
-					} 
-					InstructionHandle secondInstruction = firstInstruction.getPrev();
-					Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-			
-					System.out.println("First number found and is:" + firstNumber);
-
-					System.out.println("First number handled looking for second one");
-
-					while(!(stackChangingOp(secondInstruction) || secondInstruction != null)){
-						secondInstruction = secondInstruction.getPrev();
-					}
-					Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-
-					System.out.println("Second number found and is:" + secondNumber);
-
-
-					// delete first instruction
-					if (firstNumber == null || secondNumber == null) {
-						return false;
-                        // break here!!!!!!!!!!!!!!!!!!!!!!!!!
-					}
-
-                  	
-            	    if ((int)firstNumber == (int)secondNumber) {
-                      	for (InstructionHandle handleToDelete = handle.getNext().getNext();
-                             !handleToDelete.equals(((BranchInstruction)handle.getInstruction()).getTarget().getNext()); handleToDelete = handleToDelete.getNext()) {
-                        	System.out.println("Deleting: " + handleToDelete.getPrev());
-                        	safeInstructionDelete(instList, handleToDelete.getPrev());
-                        }
-            			// delete all instruction handles from handle.getNext() to handle.getInstruction().getTarget().getPrev()
-                  	}
-                    return true;	
-				}
-      
-      			if (handle.getInstruction() instanceof IF_ICMPGE) {
-		
-					System.out.println("So we found an IF_ICMPGE instruction looking for first number");
-			
-					InstructionHandle firstInstruction = handle.getPrev();
-					while(!(stackChangingOp(firstInstruction) || firstInstruction != null)){
-						firstInstruction = firstInstruction.getPrev();
-					} 
-					InstructionHandle secondInstruction = firstInstruction.getPrev();
-					Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-			
-					System.out.println("First number found and is:" + firstNumber);
-
-					System.out.println("First number handled looking for second one");
-
-					while(!(stackChangingOp(secondInstruction) || secondInstruction != null)){
-						secondInstruction = secondInstruction.getPrev();
-					}
-					Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-
-					System.out.println("Second number found and is:" + secondNumber);
-
-
-					// delete first instruction
-					if (firstNumber == null || secondNumber == null) {
-						return false;
-                        // break here!!!!!!!!!!!!!!!!!!!!!!!!!
-					}
-                  	
-            	    if ((int)firstNumber <= (int)secondNumber) {
-                      	for (InstructionHandle handleToDelete = handle.getNext().getNext();
-                             !handleToDelete.equals(((BranchInstruction)handle.getInstruction()).getTarget().getNext()); handleToDelete = handleToDelete.getNext()) {
-                        	System.out.println("Deleting: " + handleToDelete.getPrev());
-                        	safeInstructionDelete(instList, handleToDelete.getPrev());
-                        }
-            			// delete all instruction handles from handle.getNext() to handle.getInstruction().getTarget().getPrev()
-                  	}
-                    return true;	
-				}
-                
-      			if (handle.getInstruction() instanceof IF_ICMPGT) {
-		
-					System.out.println("So we found an IF_ICMPGT instruction looking for first number");
-			
-					InstructionHandle firstInstruction = handle.getPrev();
-					while(!(stackChangingOp(firstInstruction) || firstInstruction != null)){
-						firstInstruction = firstInstruction.getPrev();
-					} 
-					InstructionHandle secondInstruction = firstInstruction.getPrev();
-					Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-			
-					System.out.println("First number found and is:" + firstNumber);
-
-					System.out.println("First number handled looking for second one");
-
-					while(!(stackChangingOp(secondInstruction) || secondInstruction != null)){
-						secondInstruction = secondInstruction.getPrev();
-					}
-					Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-
-					System.out.println("Second number found and is:" + secondNumber);
-
-
-					// delete first instruction
-					if (firstNumber == null || secondNumber == null) {
-						return false;
-                        // break here!!!!!!!!!!!!!!!!!!!!!!!!!
-					}
-                  	
-            	    if ((int)firstNumber < (int)secondNumber) {
-                      	for (InstructionHandle handleToDelete = handle.getNext().getNext();
-                             !handleToDelete.equals(((BranchInstruction)handle.getInstruction()).getTarget().getNext()); handleToDelete = handleToDelete.getNext()) {
-                        	System.out.println("Deleting: " + handleToDelete.getPrev());
-                        	safeInstructionDelete(instList, handleToDelete.getPrev());
-                        }
-            			// delete all instruction handles from handle.getNext() to handle.getInstruction().getTarget().getPrev()
-                  	}
-                    return true;	
-				}
-      
-      			if (handle.getInstruction() instanceof IF_ICMPLE) {
-		
-					System.out.println("So we found an IF_ICMPLE instruction looking for first number");
-			
-					InstructionHandle firstInstruction = handle.getPrev();
-					while(!(stackChangingOp(firstInstruction) || firstInstruction != null)){
-						firstInstruction = firstInstruction.getPrev();
-					} 
-					InstructionHandle secondInstruction = firstInstruction.getPrev();
-					Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-			
-					System.out.println("First number found and is:" + firstNumber);
-
-					System.out.println("First number handled looking for second one");
-
-					while(!(stackChangingOp(secondInstruction) || secondInstruction != null)){
-						secondInstruction = secondInstruction.getPrev();
-					}
-					Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-
-					System.out.println("Second number found and is:" + secondNumber);
-
-
-					// delete first instruction
-					if (firstNumber == null || secondNumber == null) {
-						return false;
-                        // break here!!!!!!!!!!!!!!!!!!!!!!!!!
-					}
-                  	
-            	    if ((int)firstNumber >= (int)secondNumber) {
-                      	for (InstructionHandle handleToDelete = handle.getNext().getNext();
-                             !handleToDelete.equals(((BranchInstruction)handle.getInstruction()).getTarget().getNext()); handleToDelete = handleToDelete.getNext()) {
-                        	System.out.println("Deleting: " + handleToDelete.getPrev());
-                        	safeInstructionDelete(instList, handleToDelete.getPrev());
-                        }
-            			// delete all instruction handles from handle.getNext() to handle.getInstruction().getTarget().getPrev()
-                  	}
-                    return true;	
-				}
-      
-      			if (handle.getInstruction() instanceof IF_ICMPLT) {
-		
-					System.out.println("So we found an IF_ICMPGT instruction looking for first number");
-			
-					InstructionHandle firstInstruction = handle.getPrev();
-					while(!(stackChangingOp(firstInstruction) || firstInstruction != null)){
-						firstInstruction = firstInstruction.getPrev();
-					} 
-					InstructionHandle secondInstruction = firstInstruction.getPrev();
-					Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-			
-					System.out.println("First number found and is:" + firstNumber);
-
-					System.out.println("First number handled looking for second one");
-
-					while(!(stackChangingOp(secondInstruction) || secondInstruction != null)){
-						secondInstruction = secondInstruction.getPrev();
-					}
-					Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-
-					System.out.println("Second number found and is:" + secondNumber);
-
-
-					// delete first instruction
-					if (firstNumber == null || secondNumber == null) {
-						return false;
-                        // break here!!!!!!!!!!!!!!!!!!!!!!!!!
-					}
-                  	
-            	    if ((int)firstNumber > (int)secondNumber) {
-                      	for (InstructionHandle handleToDelete = handle.getNext().getNext();
-                             !handleToDelete.equals(((BranchInstruction)handle.getInstruction()).getTarget().getNext()); handleToDelete = handleToDelete.getNext()) {
-                        	System.out.println("Deleting: " + handleToDelete.getPrev());
-                        	safeInstructionDelete(instList, handleToDelete.getPrev());
-                        }
-            			// delete all instruction handles from handle.getNext() to handle.getInstruction().getTarget().getPrev()
-                  	}
-                    return true;	
-				}
-      
-      			if (handle.getInstruction() instanceof IF_ICMPNE) {
-		
-					System.out.println("So we found an IF_ICMPNE instruction looking for first number");
-			
-					InstructionHandle firstInstruction = handle.getPrev();
-					while(!(stackChangingOp(firstInstruction) || firstInstruction != null)){
-						firstInstruction = firstInstruction.getPrev();
-					} 
-					InstructionHandle secondInstruction = firstInstruction.getPrev();
-					Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-			
-					System.out.println("First number found and is:" + firstNumber);
-
-					System.out.println("First number handled looking for second one");
-
-					while(!(stackChangingOp(secondInstruction) || secondInstruction != null)){
-						secondInstruction = secondInstruction.getPrev();
-					}
-					Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-
-					System.out.println("Second number found and is:" + secondNumber);
-
-
-					// delete first instruction
-					if (firstNumber == null || secondNumber == null) {
-						return false;
-                        // break here!!!!!!!!!!!!!!!!!!!!!!!!!
-					}
-                  	
-            	    if ((int)firstNumber != (int)secondNumber) {
-                      	for (InstructionHandle handleToDelete = handle.getNext().getNext();
-                             !handleToDelete.equals(((BranchInstruction)handle.getInstruction()).getTarget().getNext()); handleToDelete = handleToDelete.getNext()) {
-                        	System.out.println("Deleting: " + handleToDelete.getPrev());
-                        	safeInstructionDelete(instList, handleToDelete.getPrev());
-                        }
-            			// delete all instruction handles from handle.getNext() to handle.getInstruction().getTarget().getPrev()
-                  	}
-                    return true;	
-				}
-      
-      			if (handle.getInstruction() instanceof IFNE) {
-		
-					System.out.println("So we found an IFNE instruction looking for first number");
-			
-					InstructionHandle firstInstruction = handle.getPrev();
-					while(!(stackChangingOp(firstInstruction) || firstInstruction != null)){
-						firstInstruction = firstInstruction.getPrev();
-					} 
-					InstructionHandle secondInstruction = firstInstruction.getPrev();
-					Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-			
-					System.out.println("First number found and is:" + firstNumber);
-
-					Number secondNumber = 0;
-
-					System.out.println("Second number \"found\" and is:" + secondNumber);
-
-					// delete first instruction
-					if (firstNumber == null || secondNumber == null) {
-						return false;
-                        // break here!!!!!!!!!!!!!!!!!!!!!!!!!
-					}
-                  	
-            	    if ((int)firstNumber != (int)secondNumber) {
-                      	for (InstructionHandle handleToDelete = handle.getNext().getNext();
-                             !handleToDelete.equals(((BranchInstruction)handle.getInstruction()).getTarget().getNext()); handleToDelete = handleToDelete.getNext()) {
-                        	System.out.println("Deleting: " + handleToDelete.getPrev());
-                        	safeInstructionDelete(instList, handleToDelete.getPrev());
-                        }
-            			// delete all instruction handles from handle.getNext() to handle.getInstruction().getTarget().getPrev()
-                  	}
-                    return true;	
-				}
-      
-      			if (handle.getInstruction() instanceof IFEQ) {
-		
-					System.out.println("So we found an IFEQ instruction looking for first number");
-			
-					InstructionHandle firstInstruction = handle.getPrev();
-					while(!(stackChangingOp(firstInstruction) || firstInstruction != null)){
-						firstInstruction = firstInstruction.getPrev();
-					} 
-					InstructionHandle secondInstruction = firstInstruction.getPrev();
-					Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-			
-					System.out.println("First number found and is:" + firstNumber);
-
-					Number secondNumber = 0;
-
-					System.out.println("Second number \"found\" and is:" + secondNumber);
-
-					// delete first instruction
-					if (firstNumber == null || secondNumber == null) {
-						return false;
-                        // break here!!!!!!!!!!!!!!!!!!!!!!!!!
-					}
-                  	
-            	    if ((int)firstNumber == (int)secondNumber) {
-                      	for (InstructionHandle handleToDelete = handle.getNext().getNext();
-                             !handleToDelete.equals(((BranchInstruction)handle.getInstruction()).getTarget().getNext()); handleToDelete = handleToDelete.getNext()) {
-                        	System.out.println("Deleting: " + handleToDelete.getPrev());
-                        	safeInstructionDelete(instList, handleToDelete.getPrev());
-                        }
-            			// delete all instruction handles from handle.getNext() to handle.getInstruction().getTarget().getPrev()
-                  	}
-                    return true;	
-				}
-
-    	return false;
-    }*/
+	private boolean handleArithmeticInstructions(InstructionList instList, InstructionHandle handle, Number lastStackValue) {
+		return false;
+	}
 
 	// returns true if a computable number is being stored in the stack
 	private boolean handleStoreInstructions(InstructionList instList, InstructionHandle handle, Number lastStackValue) {
@@ -592,22 +299,29 @@ public class ConstantFolder {
 			System.out.println(handle);
 			System.out.println("found corresponding i store and giong out ");
 			return true;
-		} else if (handle.getInstruction() instanceof FSTORE && lastStackValue != null) {
-			float value = (float) lastStackValue;
-			int fstoreIndex = ((FSTORE) handle.getInstruction()).getIndex();
+		}
+      
+      	else if (handle.getInstruction() instanceof FSTORE && lastStackValue != null) {
+          	float value = (float) lastStackValue;
+			int istoreIndex = ((FSTORE) handle.getInstruction()).getIndex();
 			InstructionHandle handleNow = handle.getNext();
+			int constantIndex = 0;
+			constantIndex = myCPGen.addFloat((float)value);
+          
+			System.out.println("STATUS : looking for iloads");
 
-			System.out.println("STATUS : looking for floads");
-
-			while (handleNow != null && !(handleNow.getInstruction() instanceof FSTORE && ((FSTORE) handle.getInstruction()).getIndex() == fstoreIndex && handle.getInstruction().getOpcode() == handleNow.getInstruction().getOpcode())) {
+			while (handleNow != null && !(handleNow.getInstruction() instanceof FSTORE && ((FSTORE) handle.getInstruction()).getIndex() == istoreIndex && handle.getInstruction().getOpcode() == handleNow.getInstruction().getOpcode())) {
 
 				System.out.print("looking at instruction: ");
 				System.out.println(handleNow);
 
-				if (handleNow.getInstruction() instanceof FLOAD && ((FLOAD) handleNow.getInstruction()).getIndex() == fstoreIndex) {
+				if (handleNow.getInstruction() instanceof FLOAD && ((FLOAD) handleNow.getInstruction()).getIndex() == istoreIndex) {
 					System.out.println("the above instruction is a load and will be changed to bipush");
-					instList.insert(handleNow, new BIPUSH((byte) value));
+					
+                  	instList.insert(handleNow, new LDC(constantIndex));
 					instList.setPositions();
+					
+
 					try {
 						handleNow = handleNow.getNext();
 						InstructionHandle handleDelete = handleNow.getPrev();
@@ -627,9 +341,99 @@ public class ConstantFolder {
 
 			}
 			System.out.println(handle);
-			System.out.println("found corresponding f store and giong out ");
+			System.out.println("found corresponding i store and giong out ");
 			return true;
-		} else if (handle.getInstruction() instanceof DSTORE) {} else if (handle.getInstruction() instanceof LSTORE) {} else if (handle.getInstruction() instanceof ASTORE) {} else {
+			
+		} 
+      
+      	/*else if (handle.getInstruction() instanceof DSTORE && lastStackValue != null) {
+          	double value = (double) lastStackValue;
+			int istoreIndex = ((DSTORE) handle.getInstruction()).getIndex();
+			InstructionHandle handleNow = handle.getNext();
+			int constantIndex = 0;
+			constantIndex = myCPGen.addDouble((double)value);
+          
+			System.out.println("STATUS : looking for iloads");
+
+			while (handleNow != null && !(handleNow.getInstruction() instanceof DSTORE && ((DSTORE) handle.getInstruction()).getIndex() == istoreIndex && handle.getInstruction().getOpcode() == handleNow.getInstruction().getOpcode())) {
+
+				System.out.print("looking at instruction: ");
+				System.out.println(handleNow);
+
+				if (handleNow.getInstruction() instanceof DLOAD && ((DLOAD) handleNow.getInstruction()).getIndex() == istoreIndex) {
+					System.out.println("the above instruction is a load and will be changed to bipush");
+					
+                  	instList.insert(handleNow, new LDC(constantIndex));
+					instList.setPositions();
+					
+
+					try {
+						handleNow = handleNow.getNext();
+						InstructionHandle handleDelete = handleNow.getPrev();
+						instList.redirectBranches(handleDelete, handleDelete.getPrev());
+						instList.delete(handleDelete);
+						instList.setPositions();
+					} catch (Exception e) {
+						//do nothing
+					}
+					System.out.println("This is how it looks now");
+					for (InstructionHandle hand: instList.getInstructionHandles()) {
+						System.out.println(hand);
+					}
+				} else {
+					handleNow = handleNow.getNext();
+				}
+
+			}
+			System.out.println(handle);
+			System.out.println("found corresponding i store and giong out ");
+			return true;
+			
+		} 
+        else if (handle.getInstruction() instanceof LSTORE && lastStackValue != null) {
+         	long value = (long) lastStackValue;
+			int istoreIndex = ((FSTORE) handle.getInstruction()).getIndex();
+			InstructionHandle handleNow = handle.getNext();
+			int constantIndex = 0;
+			constantIndex = myCPGen.addLong((long)value);
+          
+			System.out.println("STATUS : looking for iloads");
+
+			while (handleNow != null && !(handleNow.getInstruction() instanceof LSTORE && ((LSTORE) handle.getInstruction()).getIndex() == istoreIndex && handle.getInstruction().getOpcode() == handleNow.getInstruction().getOpcode())) {
+
+				System.out.print("looking at instruction: ");
+				System.out.println(handleNow);
+
+				if (handleNow.getInstruction() instanceof LLOAD && ((LLOAD) handleNow.getInstruction()).getIndex() == istoreIndex) {
+					System.out.println("the above instruction is a load and will be changed to bipush");
+					
+                  	instList.insert(handleNow, new LDC(constantIndex));
+					instList.setPositions();
+					
+
+					try {
+						handleNow = handleNow.getNext();
+						InstructionHandle handleDelete = handleNow.getPrev();
+						instList.redirectBranches(handleDelete, handleDelete.getPrev());
+						instList.delete(handleDelete);
+						instList.setPositions();
+					} catch (Exception e) {
+						//do nothing
+					}
+					System.out.println("This is how it looks now");
+					for (InstructionHandle hand: instList.getInstructionHandles()) {
+						System.out.println(hand);
+					}
+				} else {
+					handleNow = handleNow.getNext();
+				}
+
+			}
+			System.out.println(handle);
+			System.out.println("found corresponding i store and giong out ");
+			return true;
+//         } else if (handle.getInstruction() instanceof ASTORE && lastStackValue != null) {          
+        } */else {
 			System.out.println("INVALID INSTRUCTION");
 		}
 		return false;
@@ -1535,181 +1339,4 @@ public class ConstantFolder {
 
 /*
   IF_ICMPEQ, IF_ICMPGE, IF_ICMPGT, IF_ICMPLE, IF_ICMPLT, IF_ICMPNE, IFEQ, IFGE, IFGT, IFLE, IFLT, IFNE
-
-[java] Method: public int methodOneConstantVariableFolding()
-     [java] CONSTANT_Integer[3](bytes = 54321)
-     [java] 
-     [java] 
-     [java] 
-     [java] 
-     [java] Code after IINCS:
-     [java]    0: bipush[16](2) 42
-     [java]    2: istore_1[60](1)
-     [java]    3: iload_1[27](1)
-     [java]    4: sipush[17](3) 764
-     [java]    7: iadd[96](1)
-     [java]    8: iconst_3[6](1)
-     [java]    9: imul[104](1)
-     [java]   10: istore_2[61](1)
-     [java]   11: iload_2[28](1)
-     [java]   12: sipush[17](3) 1234
-     [java]   15: iadd[96](1)
-     [java]   16: iload_1[27](1)
-     [java]   17: isub[100](1)
-     [java]   18: ireturn[172](1)
-     [java] 
-     [java] THATS ALL
-     [java] 
-     [java] 
-     [java] 
-     [java] 
-     [java] 
-     [java] 
-     [java] 
-     [java]  optimising starts from here!!
-     [java]    0: bipush[16](2) 42
-     [java]    2: istore_1[60](1)
-     [java] Found StoreInstruction!!!
-     [java] 
-     [java] Previous Stack operation was : 
-     [java]    0: bipush[16](2) 42
-     [java] STATUS : looking for iloads
-     [java] looking at instruction:    3: iload_1[27](1)
-     [java] the above instruction is a load and will be changed to bipush
-     [java] This is how it looks now
-     [java]    0: istore_1[60](1)
-     [java]    1: bipush[16](2) 42
-     [java]    3: sipush[17](3) 764
-     [java]    6: iadd[96](1)
-     [java]    7: iconst_3[6](1)
-     [java]    8: imul[104](1)
-     [java]    9: istore_2[61](1)
-     [java]   10: iload_2[28](1)
-     [java]   11: sipush[17](3) 1234
-     [java]   14: iadd[96](1)
-     [java]   15: iload_1[27](1)
-     [java]   16: isub[100](1)
-     [java]   17: ireturn[172](1)
-     [java] looking at instruction:    3: sipush[17](3) 764
-     [java] looking at instruction:    6: iadd[96](1)
-     [java] looking at instruction:    7: iconst_3[6](1)
-     [java] looking at instruction:    8: imul[104](1)
-     [java] looking at instruction:    9: istore_2[61](1)
-     [java] looking at instruction:   10: iload_2[28](1)
-     [java] looking at instruction:   11: sipush[17](3) 1234
-     [java] looking at instruction:   14: iadd[96](1)
-     [java] looking at instruction:   15: iload_1[27](1)
-     [java] the above instruction is a load and will be changed to bipush
-     [java] This is how it looks now
-     [java]    0: istore_1[60](1)
-     [java]    1: bipush[16](2) 42
-     [java]    3: sipush[17](3) 764
-     [java]    6: iadd[96](1)
-     [java]    7: iconst_3[6](1)
-     [java]    8: imul[104](1)
-     [java]    9: istore_2[61](1)
-     [java]   10: iload_2[28](1)
-     [java]   11: sipush[17](3) 1234
-     [java]   14: iadd[96](1)
-     [java]   15: bipush[16](2) 42
-     [java]   17: isub[100](1)
-     [java]   18: ireturn[172](1)
-     [java] looking at instruction:   17: isub[100](1)
-     [java] looking at instruction:   18: ireturn[172](1)
-     [java]    0: istore_1[60](1)
-     [java] found corresponding i store and giong out 
-     [java]    0: bipush[16](2) 42
-     [java]    2: sipush[17](3) 764
-     [java]    5: iadd[96](1)
-     [java]    6: iconst_3[6](1)
-     [java]    7: imul[104](1)
-     [java]    8: istore_2[61](1)
-     [java] Found StoreInstruction!!!
-     [java] 
-     [java] Previous Stack operation was : 
-     [java]    7: imul[104](1)
-     [java] So we found an MUL instruction looking for first number
-     [java] Previous Stack operation was : 
-     [java]    6: iconst_3[6](1)
-     [java] First number found and is:3
-     [java] First number handled looking for second one
-     [java] Previous Stack operation was : 
-     [java]    5: iadd[96](1)
-     [java] So we found an ADD instruction looking for first number
-     [java] Previous Stack operation was : 
-     [java]    2: sipush[17](3) 764
-     [java] First number found and is:764
-     [java] First number handled looking for second one
-     [java] Previous Stack operation was : 
-     [java]    0: bipush[16](2) 42
-     [java] second number found and is:42
-     [java] second number found and is:806
-     [java] STATUS : looking for iloads
-     [java] looking at instruction:    9: iload_2[28](1)
-     [java] the above instruction is a load and will be changed to bipush
-     [java] This is how it looks now
-     [java]    0: istore_2[61](1)
-     [java]    1: ldc[18](2) 18
-     [java]    3: sipush[17](3) 1234
-     [java]    6: iadd[96](1)
-     [java]    7: bipush[16](2) 42
-     [java]    9: isub[100](1)
-     [java]   10: ireturn[172](1)
-     [java] looking at instruction:    3: sipush[17](3) 1234
-     [java] looking at instruction:    6: iadd[96](1)
-     [java] looking at instruction:    7: bipush[16](2) 42
-     [java] looking at instruction:    9: isub[100](1)
-     [java] looking at instruction:   10: ireturn[172](1)
-     [java]    0: istore_2[61](1)
-     [java] found corresponding i store and giong out 
-     [java]    0: ldc[18](2) 18
-     [java]    2: sipush[17](3) 1234
-     [java]    5: iadd[96](1)
-     [java]    6: bipush[16](2) 42
-     [java]    8: isub[100](1)
-     [java]    9: ireturn[172](1)
-     [java] SAMSAMSMASAMMSAMSAMASMSM
-     [java]    0: ldc[18](2) 18
-     [java]    2: sipush[17](3) 1234
-     [java]    5: iadd[96](1)
-     [java] Found ArithmeticInstruction!!!
-     [java] 
-     [java] Previous Stack operation was : 
-     [java]    2: sipush[17](3) 1234
-     [java] INVALID INSTRUCTION
-     [java]    6: bipush[16](2) 42
-     [java]    8: isub[100](1)
-     [java] Found ArithmeticInstruction!!!
-     [java] 
-     [java] Previous Stack operation was : 
-     [java]    6: bipush[16](2) 42
-     [java] INVALID INSTRUCTION
-     [java]    9: ireturn[172](1)
-     [java] 
-     [java] 
-     [java] 
-     [java] 
-     [java] This is the whole code
-     [java] 
-     [java] 
-     [java] 
-     [java] 
-     [java]    0: ldc[18](2) 18
-     [java]    5: iadd[96](1)
-     [java]    8: isub[100](1)
-     [java]    9: ireturn[172](1)
-     [java] 
-     [java] 
-     [java] 
-     [java] done
-     
-
-
-
-0: ldc[18](2) 18
-     [java]    2: ireturn[172](1)
-  
-  
-  // Number something = ((Instructiontype)handle.getInstruction())).getValue();
-  // Number something = (Number) ldc.getValue(myCPGen);
-  */
+*/
