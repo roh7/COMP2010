@@ -136,13 +136,13 @@
   
   
   <!-- clean up everything -->
-<!--   <target name="clean" description="cleanup">
+  <target name="clean" description="cleanup">
     <delete dir="${build.dir}"/>
     <delete dir="${classes.dir}"/>
     <delete dir="${tests.dir}"/>
     <delete dir="${basedir}/test-reports"/>
     <delete dir="${basedir}/optimised"/>
     <delete dir="${optimised.dir}"/>
-  </target> -->
+  </target>
 
 </project>

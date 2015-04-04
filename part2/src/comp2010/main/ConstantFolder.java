@@ -134,6 +134,7 @@ public class ConstantFolder {
 		// get the constants in the pool
 		Constant[] constants = cp.getConstantPool();
 		for (int i = 0; i < constants.length; i++) {
+
 			if (constants[i] instanceof ConstantInteger) System.out.println(constants[i]);
 
 		}
@@ -144,19 +145,25 @@ public class ConstantFolder {
 		// bipush value, iload_i, iadd, istore_i.
 		replaceINCs(instList);
 
+
 		System.out.println("\n\n\n\nCode after IINCS:");
 		for (InstructionHandle handle: instList.getInstructionHandles()) {
+
 			System.out.println(handle);
 		}
+
 		System.out.println("\nTHATS ALL\n\n\n");
+
 
 
 
 		System.out.println("\n\n\n\n optimising starts from here!!");
 		// InstructionHandle is a wrapper for actual Instructions
 		for (InstructionHandle handle = instList.getStart(); handle != null;) {
+
 			System.out.println(handle);
 			if (handle.getInstruction() instanceof StoreInstruction) {
+
 				System.out.println("Found StoreInstruction!!!\n");
 				Number lastStackValue = getLastStackPush(instList, handle);
 				if (handleStoreInstructions(instList, handle, lastStackValue)) {
@@ -172,72 +179,77 @@ public class ConstantFolder {
 				handle = handle.getNext();
 				safeInstructionDelete(instList, handleDelete);
 				instList.setPositions();
-			}
-			else {
+			} else {
 				handle = handle.getNext();
 			}
 		}
 
+
 		System.out.println("SAMSAMSMAS***FOO***SAMSAMASMSM");
 
-      for (InstructionHandle handle = instList.getStart(); handle != null;)
-		{
-        
-        	System.out.println(handle);
-        
-        
-	        if (handle.getInstruction() instanceof ArithmeticInstruction)
-	        {
+		for (InstructionHandle handle = instList.getStart(); handle != null;) {
+
+
+			System.out.println(handle);
+
+
+			if (handle.getInstruction() instanceof ArithmeticInstruction) {
+
 				System.out.println("Found ArithmeticInstruction!!!\n");
 				InstructionHandle toHandle = handle.getNext();
 				handle = handle.getNext();
 				Number lastStackValue = getLastStackPush(instList, toHandle);
-	          	
-	          if (lastStackValue != null) {
-	            System.out.println(lastStackValue);
-	          	int constantIndex = 0;
-	          	if (lastStackValue instanceof Integer) {
-	          		constantIndex = myCPGen.addInteger((int) lastStackValue);
-					instList.insert(handle, new LDC(constantIndex));
-					instList.setPositions();
-				}
-	          	if (lastStackValue instanceof Float) {
-	          		constantIndex = myCPGen.addFloat((float) lastStackValue);
-					instList.insert(handle, new LDC(constantIndex));
-					instList.setPositions();
-				}
-	          	if (lastStackValue instanceof Double) {
-	          		constantIndex = myCPGen.addDouble((double) lastStackValue);
-					instList.insert(handle, new LDC(constantIndex));
-					instList.setPositions();
-				}
-	          	if (lastStackValue instanceof Long) {
-	          		constantIndex = myCPGen.addLong((Long) lastStackValue);
-					instList.insert(handle, new LDC(constantIndex));
-					instList.setPositions();
-				}
-	          }
 
-	      }
-	          else {
-	          	handle = handle.getNext();
-	          	instList.setPositions();
-	          }
+				if (lastStackValue != null) {
+
+					System.out.println(lastStackValue);
+					int constantIndex = 0;
+					if (lastStackValue instanceof Integer) {
+						constantIndex = myCPGen.addInteger((int) lastStackValue);
+						instList.insert(handle, new LDC(constantIndex));
+						instList.setPositions();
+					}
+					if (lastStackValue instanceof Float) {
+						constantIndex = myCPGen.addFloat((float) lastStackValue);
+						instList.insert(handle, new LDC(constantIndex));
+						instList.setPositions();
+					}
+					if (lastStackValue instanceof Double) {
+						constantIndex = myCPGen.addDouble((double) lastStackValue);
+						instList.insert(handle, new LDC(constantIndex));
+						instList.setPositions();
+					}
+					if (lastStackValue instanceof Long) {
+						constantIndex = myCPGen.addLong((Long) lastStackValue);
+						instList.insert(handle, new LDC(constantIndex));
+						instList.setPositions();
+					}
+				}
+
+			} else {
+				handle = handle.getNext();
+				instList.setPositions();
+			}
 
 		}
-		
+
+
 
 		System.out.println("\n\n\n\nThis is the whole code\n\n\n\n");
 		for (InstructionHandle handle: instList.getInstructionHandles()) {
-			if (handle.getInstruction() instanceof LDC) { 
+			if (handle.getInstruction() instanceof LDC) {
 
 				LDC ldc = (LDC) handle.getInstruction();
 				//Number value = (Number)ldc.getValue(myCPGen);
-			System.out.println("Value of the following LDC is: ");
-			System.out.println(ldc.getValue(myCPGen));
-		}
+
+				System.out.println("Value of the following LDC is: ");
+
+				System.out.println(ldc.getValue(myCPGen));
+			}
+
 			System.out.println(handle);
 		}
+
 		System.out.println("\n\n\ndone\n\n");
 
 	}
@@ -260,14 +272,17 @@ public class ConstantFolder {
 				// put sth in the constant pool 
 			}
 
+
 			System.out.println("STATUS : looking for iloads");
 
 			while (handleNow != null && !(handleNow.getInstruction() instanceof ISTORE && ((ISTORE) handle.getInstruction()).getIndex() == istoreIndex && handle.getInstruction().getOpcode() == handleNow.getInstruction().getOpcode())) {
 
 				System.out.print("looking at instruction: ");
+
 				System.out.println(handleNow);
 
 				if (handleNow.getInstruction() instanceof ILOAD && ((ILOAD) handleNow.getInstruction()).getIndex() == istoreIndex) {
+
 					System.out.println("the above instruction is a load and will be changed to bipush");
 					if (value > 127 || value < -128) {
 						instList.insert(handleNow, new LDC(constantIndex));
@@ -287,8 +302,10 @@ public class ConstantFolder {
 					} catch (Exception e) {
 						//do nothing
 					}
+
 					System.out.println("This is how it looks now");
 					for (InstructionHandle hand: instList.getInstructionHandles()) {
+
 						System.out.println(hand);
 					}
 				} else {
@@ -296,31 +313,34 @@ public class ConstantFolder {
 				}
 
 			}
+
 			System.out.println(handle);
+
 			System.out.println("found corresponding i store and giong out ");
 			return true;
-		}
-      
-      	else if (handle.getInstruction() instanceof FSTORE && lastStackValue != null) {
-          	float value = (float) lastStackValue;
+		} else if (handle.getInstruction() instanceof FSTORE && lastStackValue != null) {
+			float value = (float) lastStackValue;
 			int istoreIndex = ((FSTORE) handle.getInstruction()).getIndex();
 			InstructionHandle handleNow = handle.getNext();
 			int constantIndex = 0;
-			constantIndex = myCPGen.addFloat((float)value);
-          
+			constantIndex = myCPGen.addFloat((float) value);
+
+
 			System.out.println("STATUS : looking for iloads");
 
 			while (handleNow != null && !(handleNow.getInstruction() instanceof FSTORE && ((FSTORE) handle.getInstruction()).getIndex() == istoreIndex && handle.getInstruction().getOpcode() == handleNow.getInstruction().getOpcode())) {
 
 				System.out.print("looking at instruction: ");
+
 				System.out.println(handleNow);
 
 				if (handleNow.getInstruction() instanceof FLOAD && ((FLOAD) handleNow.getInstruction()).getIndex() == istoreIndex) {
+
 					System.out.println("the above instruction is a load and will be changed to bipush");
-					
-                  	instList.insert(handleNow, new LDC(constantIndex));
+
+					instList.insert(handleNow, new LDC(constantIndex));
 					instList.setPositions();
-					
+
 
 					try {
 						handleNow = handleNow.getNext();
@@ -331,8 +351,10 @@ public class ConstantFolder {
 					} catch (Exception e) {
 						//do nothing
 					}
+
 					System.out.println("This is how it looks now");
 					for (InstructionHandle hand: instList.getInstructionHandles()) {
+
 						System.out.println(hand);
 					}
 				} else {
@@ -340,27 +362,32 @@ public class ConstantFolder {
 				}
 
 			}
+
 			System.out.println(handle);
+
 			System.out.println("found corresponding i store and giong out ");
 			return true;
-			
-		} 
-      
-      	/*else if (handle.getInstruction() instanceof DSTORE && lastStackValue != null) {
+
+		}
+
+		/*else if (handle.getInstruction() instanceof DSTORE && lastStackValue != null) {
           	double value = (double) lastStackValue;
 			int istoreIndex = ((DSTORE) handle.getInstruction()).getIndex();
 			InstructionHandle handleNow = handle.getNext();
 			int constantIndex = 0;
 			constantIndex = myCPGen.addDouble((double)value);
           
+			
 			System.out.println("STATUS : looking for iloads");
 
 			while (handleNow != null && !(handleNow.getInstruction() instanceof DSTORE && ((DSTORE) handle.getInstruction()).getIndex() == istoreIndex && handle.getInstruction().getOpcode() == handleNow.getInstruction().getOpcode())) {
 
 				System.out.print("looking at instruction: ");
+				
 				System.out.println(handleNow);
 
 				if (handleNow.getInstruction() instanceof DLOAD && ((DLOAD) handleNow.getInstruction()).getIndex() == istoreIndex) {
+					
 					System.out.println("the above instruction is a load and will be changed to bipush");
 					
                   	instList.insert(handleNow, new LDC(constantIndex));
@@ -376,8 +403,10 @@ public class ConstantFolder {
 					} catch (Exception e) {
 						//do nothing
 					}
+					
 					System.out.println("This is how it looks now");
 					for (InstructionHandle hand: instList.getInstructionHandles()) {
+						
 						System.out.println(hand);
 					}
 				} else {
@@ -385,7 +414,9 @@ public class ConstantFolder {
 				}
 
 			}
+			
 			System.out.println(handle);
+			
 			System.out.println("found corresponding i store and giong out ");
 			return true;
 			
@@ -397,14 +428,17 @@ public class ConstantFolder {
 			int constantIndex = 0;
 			constantIndex = myCPGen.addLong((long)value);
           
+			
 			System.out.println("STATUS : looking for iloads");
 
 			while (handleNow != null && !(handleNow.getInstruction() instanceof LSTORE && ((LSTORE) handle.getInstruction()).getIndex() == istoreIndex && handle.getInstruction().getOpcode() == handleNow.getInstruction().getOpcode())) {
 
 				System.out.print("looking at instruction: ");
+				
 				System.out.println(handleNow);
 
 				if (handleNow.getInstruction() instanceof LLOAD && ((LLOAD) handleNow.getInstruction()).getIndex() == istoreIndex) {
+					
 					System.out.println("the above instruction is a load and will be changed to bipush");
 					
                   	instList.insert(handleNow, new LDC(constantIndex));
@@ -420,8 +454,10 @@ public class ConstantFolder {
 					} catch (Exception e) {
 						//do nothing
 					}
+					
 					System.out.println("This is how it looks now");
 					for (InstructionHandle hand: instList.getInstructionHandles()) {
+						
 						System.out.println(hand);
 					}
 				} else {
@@ -429,11 +465,15 @@ public class ConstantFolder {
 				}
 
 			}
+			
 			System.out.println(handle);
+			
 			System.out.println("found corresponding i store and giong out ");
 			return true;
 //         } else if (handle.getInstruction() instanceof ASTORE && lastStackValue != null) {          
-        } */else {
+        } */
+		else {
+
 			System.out.println("INVALID INSTRUCTION");
 		}
 		return false;
@@ -446,7 +486,9 @@ public class ConstantFolder {
 		} while (!(stackChangingOp(lastStackOp) || lastStackOp != null));
 
 
+
 		System.out.println("Previous Stack operation was : ");
+
 		System.out.println(lastStackOp);
 
 		if (lastStackOp.getInstruction() instanceof BIPUSH) {
@@ -475,6 +517,7 @@ public class ConstantFolder {
 			return value;
 		} else if (lastStackOp.getInstruction() instanceof IADD) {
 
+
 			System.out.println("So we found an ADD instruction looking for first number");
 
 			InstructionHandle firstInstruction = lastStackOp.getPrev();
@@ -484,15 +527,19 @@ public class ConstantFolder {
 			InstructionHandle secondInstruction = firstInstruction.getPrev();
 			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
 
+
 			System.out.println("First number found and is:" + firstNumber);
+
 
 			System.out.println("First number handled looking for second one");
 
 			while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
+
 				System.out.println("SAM");
 				secondInstruction = secondInstruction.getPrev();
 			}
 			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
 
 			System.out.println("second number found and is:" + secondNumber);
 
@@ -506,6 +553,7 @@ public class ConstantFolder {
 			return ((int) firstNumber + (int) secondNumber);
 		} else if (lastStackOp.getInstruction() instanceof IMUL) {
 
+
 			System.out.println("So we found an MUL instruction looking for first number");
 
 			InstructionHandle firstInstruction = lastStackOp.getPrev();
@@ -515,15 +563,19 @@ public class ConstantFolder {
 			InstructionHandle secondInstruction = firstInstruction.getPrev();
 			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
 
+
 			System.out.println("First number found and is:" + firstNumber);
+
 
 			System.out.println("First number handled looking for second one");
 
 			while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
+
 				System.out.println("SAM");
 				secondInstruction = secondInstruction.getPrev();
 			}
 			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
 
 			System.out.println("second number found and is:" + secondNumber);
 
@@ -537,6 +589,7 @@ public class ConstantFolder {
 			return ((int) firstNumber * (int) secondNumber);
 		} else if (lastStackOp.getInstruction() instanceof IDIV) {
 
+
 			System.out.println("So we found an DIV instruction looking for first number");
 
 			InstructionHandle firstInstruction = lastStackOp.getPrev();
@@ -546,15 +599,19 @@ public class ConstantFolder {
 			InstructionHandle secondInstruction = firstInstruction.getPrev();
 			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
 
+
 			System.out.println("First number found and is:" + firstNumber);
+
 
 			System.out.println("First number handled looking for second one");
 
 			while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
+
 				System.out.println("SAM");
 				secondInstruction = secondInstruction.getPrev();
 			}
 			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
 
 			System.out.println("second number found and is:" + secondNumber);
 
@@ -568,6 +625,7 @@ public class ConstantFolder {
 			return ((int) secondNumber / (int) firstNumber);
 		} else if (lastStackOp.getInstruction() instanceof ISUB) {
 
+
 			System.out.println("So we found an SUB instruction looking for first number");
 
 			InstructionHandle firstInstruction = lastStackOp.getPrev();
@@ -577,15 +635,19 @@ public class ConstantFolder {
 			InstructionHandle secondInstruction = firstInstruction.getPrev();
 			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
 
+
 			System.out.println("First number found and is:" + firstNumber);
+
 
 			System.out.println("First number handled looking for second one");
 
 			while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
+
 				System.out.println("SAM");
 				secondInstruction = secondInstruction.getPrev();
 			}
 			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
 
 			System.out.println("second number found and is:" + secondNumber);
 
@@ -599,6 +661,7 @@ public class ConstantFolder {
 			return ((int) secondNumber - (int) firstNumber);
 		} else if (lastStackOp.getInstruction() instanceof IREM) {
 
+
 			System.out.println("So we found an REM instruction looking for first number");
 
 			InstructionHandle firstInstruction = lastStackOp.getPrev();
@@ -608,18 +671,22 @@ public class ConstantFolder {
 			InstructionHandle secondInstruction = firstInstruction.getPrev();
 			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
 
+
 			System.out.println("First number found and is:" + firstNumber);
+
 
 			System.out.println("First number handled looking for second one");
 
 			while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
+
 				System.out.println("SAM");
 				secondInstruction = secondInstruction.getPrev();
 			}
 			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
 
+
 			System.out.println("second number found and is:" + secondNumber);
-          
+
 			// delete first instruction
 			if (firstNumber == null || secondNumber == null) {
 				return null;
@@ -628,6 +695,7 @@ public class ConstantFolder {
 			safeInstructionDelete(instList, lastStackOp);
 			return ((int) secondNumber % (int) firstNumber);
 		} else if (lastStackOp.getInstruction() instanceof LADD) {
+
 
 			System.out.println("So we found an ADD instruction looking for first number");
 
@@ -638,15 +706,19 @@ public class ConstantFolder {
 			InstructionHandle secondInstruction = firstInstruction.getPrev();
 			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
 
+
 			System.out.println("First number found and is:" + firstNumber);
+
 
 			System.out.println("First number handled looking for second one");
 
 			while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
+
 				System.out.println("SAM");
 				secondInstruction = secondInstruction.getPrev();
 			}
 			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
 
 			System.out.println("second number found and is:" + secondNumber);
 
@@ -659,6 +731,7 @@ public class ConstantFolder {
 			return ((long) firstNumber + (long) secondNumber);
 		} else if (lastStackOp.getInstruction() instanceof LMUL) {
 
+
 			System.out.println("So we found an MUL instruction looking for first number");
 
 			InstructionHandle firstInstruction = lastStackOp.getPrev();
@@ -668,15 +741,19 @@ public class ConstantFolder {
 			InstructionHandle secondInstruction = firstInstruction.getPrev();
 			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
 
+
 			System.out.println("First number found and is:" + firstNumber);
+
 
 			System.out.println("First number handled looking for second one");
 
 			while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
+
 				System.out.println("SAM");
 				secondInstruction = secondInstruction.getPrev();
 			}
 			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
 
 			System.out.println("second number found and is:" + secondNumber);
 
@@ -689,6 +766,7 @@ public class ConstantFolder {
 			return ((long) firstNumber * (long) secondNumber);
 		} else if (lastStackOp.getInstruction() instanceof LDIV) {
 
+
 			System.out.println("So we found an DIV instruction looking for first number");
 
 			InstructionHandle firstInstruction = lastStackOp.getPrev();
@@ -698,15 +776,19 @@ public class ConstantFolder {
 			InstructionHandle secondInstruction = firstInstruction.getPrev();
 			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
 
+
 			System.out.println("First number found and is:" + firstNumber);
+
 
 			System.out.println("First number handled looking for second one");
 
 			while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
+
 				System.out.println("SAM");
 				secondInstruction = secondInstruction.getPrev();
 			}
 			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
 
 			System.out.println("second number found and is:" + secondNumber);
 
@@ -719,6 +801,7 @@ public class ConstantFolder {
 			return ((long) secondNumber / (long) firstNumber);
 		} else if (lastStackOp.getInstruction() instanceof LSUB) {
 
+
 			System.out.println("So we found an SUB instruction looking for first number");
 
 			InstructionHandle firstInstruction = lastStackOp.getPrev();
@@ -728,15 +811,19 @@ public class ConstantFolder {
 			InstructionHandle secondInstruction = firstInstruction.getPrev();
 			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
 
+
 			System.out.println("First number found and is:" + firstNumber);
+
 
 			System.out.println("First number handled looking for second one");
 
 			while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
+
 				System.out.println("SAM");
 				secondInstruction = secondInstruction.getPrev();
 			}
 			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
 
 			System.out.println("second number found and is:" + secondNumber);
 
@@ -749,6 +836,7 @@ public class ConstantFolder {
 			return ((long) secondNumber - (long) firstNumber);
 		} else if (lastStackOp.getInstruction() instanceof LREM) {
 
+
 			System.out.println("So we found an REM instruction looking for first number");
 
 			InstructionHandle firstInstruction = lastStackOp.getPrev();
@@ -758,15 +846,19 @@ public class ConstantFolder {
 			InstructionHandle secondInstruction = firstInstruction.getPrev();
 			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
 
+
 			System.out.println("First number found and is:" + firstNumber);
+
 
 			System.out.println("First number handled looking for second one");
 
 			while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
+
 				System.out.println("SAM");
 				secondInstruction = secondInstruction.getPrev();
 			}
 			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
 
 			System.out.println("second number found and is:" + secondNumber);
 
@@ -779,6 +871,7 @@ public class ConstantFolder {
 			return ((long) secondNumber % (long) firstNumber);
 		} else if (lastStackOp.getInstruction() instanceof FADD) {
 
+
 			System.out.println("So we found an ADD instruction looking for first number");
 
 			InstructionHandle firstInstruction = lastStackOp.getPrev();
@@ -788,15 +881,19 @@ public class ConstantFolder {
 			InstructionHandle secondInstruction = firstInstruction.getPrev();
 			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
 
+
 			System.out.println("First number found and is:" + firstNumber);
+
 
 			System.out.println("First number handled looking for second one");
 
 			while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
+
 				System.out.println("SAM");
 				secondInstruction = secondInstruction.getPrev();
 			}
 			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
 
 			System.out.println("second number found and is:" + secondNumber);
 
@@ -809,6 +906,7 @@ public class ConstantFolder {
 			return ((float) firstNumber + (float) secondNumber);
 		} else if (lastStackOp.getInstruction() instanceof FMUL) {
 
+
 			System.out.println("So we found an MUL instruction looking for first number");
 
 			InstructionHandle firstInstruction = lastStackOp.getPrev();
@@ -818,15 +916,19 @@ public class ConstantFolder {
 			InstructionHandle secondInstruction = firstInstruction.getPrev();
 			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
 
+
 			System.out.println("First number found and is:" + firstNumber);
+
 
 			System.out.println("First number handled looking for second one");
 
 			while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
+
 				System.out.println("SAM");
 				secondInstruction = secondInstruction.getPrev();
 			}
 			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
 
 			System.out.println("second number found and is:" + secondNumber);
 
@@ -839,6 +941,7 @@ public class ConstantFolder {
 			return ((float) firstNumber * (float) secondNumber);
 		} else if (lastStackOp.getInstruction() instanceof FDIV) {
 
+
 			System.out.println("So we found an DIV instruction looking for first number");
 
 			InstructionHandle firstInstruction = lastStackOp.getPrev();
@@ -848,15 +951,19 @@ public class ConstantFolder {
 			InstructionHandle secondInstruction = firstInstruction.getPrev();
 			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
 
+
 			System.out.println("First number found and is:" + firstNumber);
+
 
 			System.out.println("First number handled looking for second one");
 
 			while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
+
 				System.out.println("SAM");
 				secondInstruction = secondInstruction.getPrev();
 			}
 			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
 
 			System.out.println("second number found and is:" + secondNumber);
 
@@ -869,6 +976,7 @@ public class ConstantFolder {
 			return ((float) secondNumber / (float) firstNumber);
 		} else if (lastStackOp.getInstruction() instanceof FSUB) {
 
+
 			System.out.println("So we found an SUB instruction looking for first number");
 
 			InstructionHandle firstInstruction = lastStackOp.getPrev();
@@ -878,15 +986,19 @@ public class ConstantFolder {
 			InstructionHandle secondInstruction = firstInstruction.getPrev();
 			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
 
+
 			System.out.println("First number found and is:" + firstNumber);
+
 
 			System.out.println("First number handled looking for second one");
 
 			while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
+
 				System.out.println("SAM");
 				secondInstruction = secondInstruction.getPrev();
 			}
 			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
 
 			System.out.println("second number found and is:" + secondNumber);
 
@@ -899,6 +1011,7 @@ public class ConstantFolder {
 			return ((float) secondNumber - (float) firstNumber);
 		} else if (lastStackOp.getInstruction() instanceof FREM) {
 
+
 			System.out.println("So we found an REM instruction looking for first number");
 
 			InstructionHandle firstInstruction = lastStackOp.getPrev();
@@ -908,15 +1021,19 @@ public class ConstantFolder {
 			InstructionHandle secondInstruction = firstInstruction.getPrev();
 			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
 
+
 			System.out.println("First number found and is:" + firstNumber);
+
 
 			System.out.println("First number handled looking for second one");
 
 			while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
+
 				System.out.println("SAM");
 				secondInstruction = secondInstruction.getPrev();
 			}
 			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
 
 			System.out.println("second number found and is:" + secondNumber);
 
@@ -929,6 +1046,7 @@ public class ConstantFolder {
 			return ((float) secondNumber % (float) firstNumber);
 		} else if (lastStackOp.getInstruction() instanceof DADD) {
 
+
 			System.out.println("So we found an ADD instruction looking for first number");
 
 			InstructionHandle firstInstruction = lastStackOp.getPrev();
@@ -938,15 +1056,19 @@ public class ConstantFolder {
 			InstructionHandle secondInstruction = firstInstruction.getPrev();
 			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
 
+
 			System.out.println("First number found and is:" + firstNumber);
+
 
 			System.out.println("First number handled looking for second one");
 
 			while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
+
 				System.out.println("SAM");
 				secondInstruction = secondInstruction.getPrev();
 			}
 			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
 
 			System.out.println("second number found and is:" + secondNumber);
 
@@ -959,6 +1081,7 @@ public class ConstantFolder {
 			return ((double) firstNumber + (double) secondNumber);
 		} else if (lastStackOp.getInstruction() instanceof DMUL) {
 
+
 			System.out.println("So we found an MUL instruction looking for first number");
 
 			InstructionHandle firstInstruction = lastStackOp.getPrev();
@@ -968,15 +1091,19 @@ public class ConstantFolder {
 			InstructionHandle secondInstruction = firstInstruction.getPrev();
 			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
 
+
 			System.out.println("First number found and is:" + firstNumber);
+
 
 			System.out.println("First number handled looking for second one");
 
 			while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
+
 				System.out.println("SAM");
 				secondInstruction = secondInstruction.getPrev();
 			}
 			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
 
 			System.out.println("second number found and is:" + secondNumber);
 
@@ -989,6 +1116,7 @@ public class ConstantFolder {
 			return ((double) firstNumber * (double) secondNumber);
 		} else if (lastStackOp.getInstruction() instanceof DDIV) {
 
+
 			System.out.println("So we found an DIV instruction looking for first number");
 
 			InstructionHandle firstInstruction = lastStackOp.getPrev();
@@ -998,15 +1126,19 @@ public class ConstantFolder {
 			InstructionHandle secondInstruction = firstInstruction.getPrev();
 			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
 
+
 			System.out.println("First number found and is:" + firstNumber);
+
 
 			System.out.println("First number handled looking for second one");
 
 			while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
+
 				System.out.println("SAM");
 				secondInstruction = secondInstruction.getPrev();
 			}
 			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
 
 			System.out.println("second number found and is:" + secondNumber);
 
@@ -1019,6 +1151,7 @@ public class ConstantFolder {
 			return ((double) secondNumber / (double) firstNumber);
 		} else if (lastStackOp.getInstruction() instanceof DSUB) {
 
+
 			System.out.println("So we found an SUB instruction looking for first number");
 
 			InstructionHandle firstInstruction = lastStackOp.getPrev();
@@ -1028,15 +1161,19 @@ public class ConstantFolder {
 			InstructionHandle secondInstruction = firstInstruction.getPrev();
 			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
 
+
 			System.out.println("First number found and is:" + firstNumber);
+
 
 			System.out.println("First number handled looking for second one");
 
 			while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
+
 				System.out.println("SAM");
 				secondInstruction = secondInstruction.getPrev();
 			}
 			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
 
 			System.out.println("second number found and is:" + secondNumber);
 
@@ -1049,6 +1186,7 @@ public class ConstantFolder {
 			return ((double) secondNumber - (double) firstNumber);
 		} else if (lastStackOp.getInstruction() instanceof DREM) {
 
+
 			System.out.println("So we found an REM instruction looking for first number");
 
 			InstructionHandle firstInstruction = lastStackOp.getPrev();
@@ -1058,15 +1196,19 @@ public class ConstantFolder {
 			InstructionHandle secondInstruction = firstInstruction.getPrev();
 			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
 
+
 			System.out.println("First number found and is:" + firstNumber);
+
 
 			System.out.println("First number handled looking for second one");
 
 			while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
+
 				System.out.println("SAM");
 				secondInstruction = secondInstruction.getPrev();
 			}
 			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
 
 			System.out.println("second number found and is:" + secondNumber);
 
@@ -1079,6 +1221,7 @@ public class ConstantFolder {
 			return ((double) secondNumber % (double) firstNumber);
 		} else if (lastStackOp.getInstruction() instanceof DCMPG) {
 
+
 			System.out.println("So we found an CMPG instruction looking for first number");
 
 			InstructionHandle firstInstruction = lastStackOp.getPrev();
@@ -1088,15 +1231,19 @@ public class ConstantFolder {
 			InstructionHandle secondInstruction = firstInstruction.getPrev();
 			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
 
+
 			System.out.println("First number found and is:" + firstNumber);
+
 
 			System.out.println("First number handled looking for second one");
 
 			while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
+
 				System.out.println("SAM");
 				secondInstruction = secondInstruction.getPrev();
 			}
 			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
 
 			System.out.println("second number found and is:" + secondNumber);
 
@@ -1115,6 +1262,7 @@ public class ConstantFolder {
 			}
 		} else if (lastStackOp.getInstruction() instanceof DCMPL) {
 
+
 			System.out.println("So we found an CMPL instruction looking for first number");
 
 			InstructionHandle firstInstruction = lastStackOp.getPrev();
@@ -1124,15 +1272,19 @@ public class ConstantFolder {
 			InstructionHandle secondInstruction = firstInstruction.getPrev();
 			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
 
+
 			System.out.println("First number found and is:" + firstNumber);
+
 
 			System.out.println("First number handled looking for second one");
 
 			while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
+
 				System.out.println("SAM");
 				secondInstruction = secondInstruction.getPrev();
 			}
 			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
 
 			System.out.println("second number found and is:" + secondNumber);
 
@@ -1151,6 +1303,7 @@ public class ConstantFolder {
 			}
 		} else if (lastStackOp.getInstruction() instanceof LCMP) {
 
+
 			System.out.println("So we found an CMP instruction looking for first number");
 
 			InstructionHandle firstInstruction = lastStackOp.getPrev();
@@ -1160,15 +1313,19 @@ public class ConstantFolder {
 			InstructionHandle secondInstruction = firstInstruction.getPrev();
 			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
 
+
 			System.out.println("First number found and is:" + firstNumber);
+
 
 			System.out.println("First number handled looking for second one");
 
 			while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
+
 				System.out.println("SAM");
 				secondInstruction = secondInstruction.getPrev();
 			}
 			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
 
 			System.out.println("second number found and is:" + secondNumber);
 
@@ -1187,6 +1344,7 @@ public class ConstantFolder {
 			}
 		} else if (lastStackOp.getInstruction() instanceof FCMPG) {
 
+
 			System.out.println("So we found an CMPG instruction looking for first number");
 
 			InstructionHandle firstInstruction = lastStackOp.getPrev();
@@ -1196,15 +1354,19 @@ public class ConstantFolder {
 			InstructionHandle secondInstruction = firstInstruction.getPrev();
 			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
 
+
 			System.out.println("First number found and is:" + firstNumber);
+
 
 			System.out.println("First number handled looking for second one");
 
 			while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
+
 				System.out.println("SAM");
 				secondInstruction = secondInstruction.getPrev();
 			}
 			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
 
 			System.out.println("second number found and is:" + secondNumber);
 
@@ -1223,6 +1385,7 @@ public class ConstantFolder {
 			}
 		} else if (lastStackOp.getInstruction() instanceof FCMPL) {
 
+
 			System.out.println("So we found an CMPL instruction looking for first number");
 
 			InstructionHandle firstInstruction = lastStackOp.getPrev();
@@ -1232,15 +1395,19 @@ public class ConstantFolder {
 			InstructionHandle secondInstruction = firstInstruction.getPrev();
 			Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
 
+
 			System.out.println("First number found and is:" + firstNumber);
+
 
 			System.out.println("First number handled looking for second one");
 
 			while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
+
 				System.out.println("SAM");
 				secondInstruction = secondInstruction.getPrev();
 			}
 			Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
+
 
 			System.out.println("second number found and is:" + secondNumber);
 
@@ -1312,6 +1479,7 @@ public class ConstantFolder {
 		// Do your optimization here
 		Method[] methods = cgen.getMethods();
 		for (Method m: methods) {
+
 			System.out.println("Method: " + m);
 			optimizeMethod(cgen, cpgen, m);
 
