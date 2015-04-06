@@ -15,85 +15,17 @@ import java.util.ArrayList;
 
 import org.apache.bcel.classfile.ClassParser;
 import org.apache.bcel.classfile.JavaClass;
-import org.apache.bcel.generic.ClassGen;
 
 import org.apache.bcel.classfile.Code;
 import org.apache.bcel.classfile.Method;
-import org.apache.bcel.generic.MethodGen;
-import org.apache.bcel.generic.ConstantPoolGen;
 import org.apache.bcel.classfile.Constant;
 import org.apache.bcel.classfile.ConstantPool;
-
 import org.apache.bcel.classfile.ConstantInteger;
 
-import org.apache.bcel.generic.Instruction;
-import org.apache.bcel.generic.InstructionHandle;
-import org.apache.bcel.generic.InstructionList;
-import org.apache.bcel.generic.StoreInstruction;
-import org.apache.bcel.generic.ArithmeticInstruction;
-import org.apache.bcel.generic.BIPUSH;
-import org.apache.bcel.generic.ISTORE;
-import org.apache.bcel.generic.ASTORE;
-import org.apache.bcel.generic.FSTORE;
-import org.apache.bcel.generic.DSTORE;
-import org.apache.bcel.generic.LSTORE;
-import org.apache.bcel.generic.DCMPG;
-import org.apache.bcel.generic.SIPUSH;
-import org.apache.bcel.generic.DCMPL;
-import org.apache.bcel.generic.DCONST;
-import org.apache.bcel.generic.FCMPG;
-import org.apache.bcel.generic.FCMPL;
-import org.apache.bcel.generic.FCONST;
-import org.apache.bcel.generic.ICONST;
-import org.apache.bcel.generic.LCMP;
-import org.apache.bcel.generic.LCONST;
-import org.apache.bcel.generic.IINC;
-import org.apache.bcel.generic.IADD;
-import org.apache.bcel.generic.ILOAD;
-import org.apache.bcel.generic.FLOAD;
-import org.apache.bcel.generic.DLOAD;
-import org.apache.bcel.generic.LLOAD;
-import org.apache.bcel.generic.IMUL;
-import org.apache.bcel.generic.ISUB;
-import org.apache.bcel.generic.IREM;
-import org.apache.bcel.generic.IDIV;
-import org.apache.bcel.generic.FADD;
-import org.apache.bcel.generic.FMUL;
-import org.apache.bcel.generic.FSUB;
-import org.apache.bcel.generic.FREM;
-import org.apache.bcel.generic.FDIV;
-import org.apache.bcel.generic.DADD;
-import org.apache.bcel.generic.DMUL;
-import org.apache.bcel.generic.DSUB;
-import org.apache.bcel.generic.DREM;
-import org.apache.bcel.generic.DDIV;
-import org.apache.bcel.generic.LADD;
-import org.apache.bcel.generic.LMUL;
-import org.apache.bcel.generic.LSUB;
-import org.apache.bcel.generic.LREM;
-import org.apache.bcel.generic.LDIV;
-import org.apache.bcel.generic.DCMPG;
-import org.apache.bcel.generic.DCMPL;
-import org.apache.bcel.generic.FCMPG;
-import org.apache.bcel.generic.FCMPL;
-import org.apache.bcel.generic.LCMP;
-import org.apache.bcel.generic.NOP;
-import org.apache.bcel.generic.IF_ICMPEQ;
-import org.apache.bcel.generic.IF_ICMPGE;
-import org.apache.bcel.generic.IF_ICMPGT;
-import org.apache.bcel.generic.IF_ICMPLE;
-import org.apache.bcel.generic.IF_ICMPLT;
-import org.apache.bcel.generic.IF_ICMPNE;
-import org.apache.bcel.generic.IFNE;
-import org.apache.bcel.generic.LDC;
-
-import org.apache.bcel.generic.BranchInstruction;
-import org.apache.bcel.generic.IfInstruction;
-
-import org.apache.bcel.generic.LocalVariableInstruction;
-import org.apache.bcel.generic.StackInstruction;
+import org.apache.bcel.generic.*;
 
 public class ConstantFolder {
+
 	ClassParser parser = null;
 	ClassGen gen = null;
 
@@ -242,15 +174,43 @@ public class ConstantFolder {
 				LDC ldc = (LDC) handle.getInstruction();
 				//Number value = (Number)ldc.getValue(myCPGen);
 
-				System.out.println("Value of the following LDC is: ");
+				System.out.print("Value of the following LDC is: ");
 
 				System.out.println(ldc.getValue(myCPGen));
+			}
+			if (handle.getInstruction() instanceof LDC2_W) {
+
+				LDC2_W ldc2_w = (LDC2_W) handle.getInstruction();
+				//Number value = (Number)ldc.getValue(myCPGen);
+
+				System.out.print("Value of the following LDC2_W is: ");
+
+				System.out.println(ldc2_w.getValue(myCPGen));
 			}
 
 			System.out.println(handle);
 		}
 
 		System.out.println("\n\n\ndone\n\n");
+
+		instList.setPositions(true);
+
+		// set max stack/local
+		methodGen.setMaxStack();
+		methodGen.setMaxLocals();
+
+		Method newMethod = methodGen.getMethod();
+		Code newMethodCode = newMethod.getCode();
+
+		// Now get the actualy bytecode data in byte array, 
+		// and use it to initialise an InstructionList
+		InstructionList newInstList = new InstructionList(newMethodCode.getCode());
+
+		for (InstructionHandle handle: newInstList.getInstructionHandles()) {
+
+			System.out.println(handle);
+		}
+		cgen.replaceMethod(method, newMethod);
 
 	}
 
@@ -267,7 +227,7 @@ public class ConstantFolder {
 			InstructionHandle handleNow = handle.getNext();
 			int constantIndex = 0;
 
-			if (value > 127 || value < -128) {
+			if (value > 32767 || value < -32678) {
 				constantIndex = myCPGen.addInteger((int) value);
 				// put sth in the constant pool 
 			}
@@ -284,11 +244,16 @@ public class ConstantFolder {
 				if (handleNow.getInstruction() instanceof ILOAD && ((ILOAD) handleNow.getInstruction()).getIndex() == istoreIndex) {
 
 					System.out.println("the above instruction is a load and will be changed to bipush");
-					if (value > 127 || value < -128) {
+					if (value > 32767 || value < -32768) {
 						instList.insert(handleNow, new LDC(constantIndex));
 						instList.setPositions();
 						// insert the ldc we defined a few lines above
-					} else {
+					}
+					else if (value > 127 || value < -128){
+						instList.insert(handleNow, new SIPUSH((short) value));
+						instList.setPositions();
+					}
+					else {
 						instList.insert(handleNow, new BIPUSH((byte) value));
 						instList.setPositions();
 					}
@@ -370,7 +335,7 @@ public class ConstantFolder {
 
 		}
 
-		/*else if (handle.getInstruction() instanceof DSTORE && lastStackValue != null) {
+		else if (handle.getInstruction() instanceof DSTORE && lastStackValue != null) {
           	double value = (double) lastStackValue;
 			int istoreIndex = ((DSTORE) handle.getInstruction()).getIndex();
 			InstructionHandle handleNow = handle.getNext();
@@ -390,7 +355,7 @@ public class ConstantFolder {
 					
 					System.out.println("the above instruction is a load and will be changed to bipush");
 					
-                  	instList.insert(handleNow, new LDC(constantIndex));
+                  	instList.insert(handleNow, new LDC2_W(constantIndex));
 					instList.setPositions();
 					
 
@@ -420,7 +385,7 @@ public class ConstantFolder {
 			System.out.println("found corresponding i store and giong out ");
 			return true;
 			
-		} 
+		} /*
         else if (handle.getInstruction() instanceof LSTORE && lastStackValue != null) {
          	long value = (long) lastStackValue;
 			int istoreIndex = ((FSTORE) handle.getInstruction()).getIndex();
@@ -529,7 +494,10 @@ public class ConstantFolder {
 
 
 			System.out.println("First number found and is:" + firstNumber);
-
+			
+			if (firstNumber == null) {
+				return null;
+			}
 
 			System.out.println("First number handled looking for second one");
 
@@ -545,7 +513,7 @@ public class ConstantFolder {
 
 
 			// delete first instruction
-			if (firstNumber == null || secondNumber == null) {
+			if (secondNumber == null) {
 				return null;
 			}
 
@@ -709,6 +677,9 @@ public class ConstantFolder {
 
 			System.out.println("First number found and is:" + firstNumber);
 
+			if (firstNumber == null) {
+				return null;
+			}
 
 			System.out.println("First number handled looking for second one");
 
@@ -723,7 +694,7 @@ public class ConstantFolder {
 			System.out.println("second number found and is:" + secondNumber);
 
 			// delete first instruction
-			if (firstNumber == null || secondNumber == null) {
+			if (secondNumber == null) {
 				return null;
 			}
 
@@ -884,6 +855,9 @@ public class ConstantFolder {
 
 			System.out.println("First number found and is:" + firstNumber);
 
+			if (firstNumber == null) {
+				return null;
+			}
 
 			System.out.println("First number handled looking for second one");
 
@@ -898,7 +872,7 @@ public class ConstantFolder {
 			System.out.println("second number found and is:" + secondNumber);
 
 			// delete first instruction
-			if (firstNumber == null || secondNumber == null) {
+			if (secondNumber == null) {
 				return null;
 			}
 
@@ -1058,8 +1032,9 @@ public class ConstantFolder {
 
 
 			System.out.println("First number found and is:" + firstNumber);
-
-
+			if (firstNumber == null) {
+				return null;
+			}
 			System.out.println("First number handled looking for second one");
 
 			while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
@@ -1073,7 +1048,7 @@ public class ConstantFolder {
 			System.out.println("second number found and is:" + secondNumber);
 
 			// delete first instruction
-			if (firstNumber == null || secondNumber == null) {
+			if (secondNumber == null) {
 				return null;
 			}
 
@@ -1475,18 +1450,21 @@ public class ConstantFolder {
 		// load the original class into a class generator
 		ClassGen cgen = new ClassGen(original);
 		ConstantPoolGen cpgen = cgen.getConstantPool();
+		cgen.setMajor(50);
 
 		// Do your optimization here
 		Method[] methods = cgen.getMethods();
 		for (Method m: methods) {
 
-			System.out.println("Method: " + m);
-			optimizeMethod(cgen, cpgen, m);
+			System.out.println("Method: '" + m.getName() + "'");
+				optimizeMethod(cgen, cpgen, m);
+			
+			//System.console().readLine();
 
 		}
 
 		// Do your optimization here
-		this.optimized = gen.getJavaClass();
+		this.optimized = cgen.getJavaClass();
 	}
 
 	public void write(String optimisedFilePath) {
