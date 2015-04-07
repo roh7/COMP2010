@@ -895,7 +895,8 @@ public class ConstantFolder {
 
 
 		System.out.println("second number found and is:" + secondNumber);
-		return {firstNumber, secondNumber};
+		Number[] toReturn = {firstNumber, secondNumber};
+		return toReturn;
 	}
 
 	private Boolean stackChangingOp(InstructionHandle handle) {
