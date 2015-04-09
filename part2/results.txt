@@ -1,0 +1,33 @@
+Buildfile: /Users/Samusof/Desktop/Uni_Documents/Second_Year/Compilers/CW/spp-compiler/part2/build.xml
+
+compile.source:
+    [javac] Compiling 1 source file to /Users/Samusof/Desktop/Uni_Documents/Second_Year/Compilers/CW/spp-compiler/part2/build/classes
+
+generate:
+     [java] Generated: /Users/Samusof/Desktop/Uni_Documents/Second_Year/Compilers/CW/spp-compiler/part2/build/classes/comp2010/target/SimpleFolding.class
+
+optimise:
+     [echo] Running constant folding optimisation...
+
+compile.tests:
+
+compile:
+
+test.original:
+     [echo] Running unit tests for the original classes...
+    [junit] Running comp2010.target.ConstantVariableFoldingTest
+    [junit] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.015 sec
+    [junit] Running comp2010.target.DynamicVariableFoldingTest
+    [junit] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.016 sec
+
+test.optimised:
+     [echo] Running unit tests for the optimised classes...
+    [junit] Running comp2010.target.ConstantVariableFoldingTest
+    [junit] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.016 sec
+    [junit] Running comp2010.target.DynamicVariableFoldingTest
+    [junit] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.016 sec
+
+test:
+
+BUILD SUCCESSFUL
+Total time: 2 seconds
