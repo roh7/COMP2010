@@ -219,10 +219,6 @@ public class ConstantFolder {
 
     }
 
-    private boolean handleArithmeticInstructions(InstructionList instList, InstructionHandle handle, Number lastStackValue) {
-        return false;
-    }
-
     // returns true if a computable number is being stored in the stack
     private boolean handleStoreInstructions(InstructionList instList, InstructionHandle handle, Number lastStackValue) {
 
@@ -2183,3 +2179,4 @@ public class ConstantFolder {
         }
     }
 }
+
