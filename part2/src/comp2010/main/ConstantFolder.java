@@ -59,13 +59,6 @@ public class ConstantFolder {
 
         InstructionHandle valueHolder;
 
-<<<<<<< Updated upstream
-        // Changes the iincs to :
-        // bipush value, iload_i, iadd, istore_i.
-        replaceINCs(instList);
-
-=======
->>>>>>> Stashed changes
         // InstructionHandle is a wrapper for actual Instructions
         for (InstructionHandle handle = instList.getStart(); handle != null;) {
 
@@ -85,18 +78,7 @@ public class ConstantFolder {
                 handle = handle.getNext();
                 safeInstructionDelete(instList, handleDelete);
                 instList.setPositions();
-<<<<<<< Updated upstream
-            } else {
-                handle = handle.getNext();
-            }
-        }
-
-        for (InstructionHandle handle = instList.getStart(); handle != null;) {
-
-            if (handle.getInstruction() instanceof ArithmeticInstruction) {
-=======
             } else if (handle.getInstruction() instanceof ArithmeticInstruction) {
->>>>>>> Stashed changes
 
                 InstructionHandle toHandle = handle.getNext();
                 handle = handle.getNext();
@@ -126,22 +108,6 @@ public class ConstantFolder {
                         instList.setPositions();
                     }
                 }
-<<<<<<< Updated upstream
-            } else {
-                handle = handle.getNext();
-                instList.setPositions();
-            }
-
-        }
-
-        for (InstructionHandle handle: instList.getInstructionHandles()) {
-            if (handle.getInstruction() instanceof LDC) {
-                LDC ldc = (LDC) handle.getInstruction();
-            }
-            if (handle.getInstruction() instanceof LDC2_W) {
-                LDC2_W ldc2_w = (LDC2_W) handle.getInstruction();
-            }
-=======
             } else if (handle.getInstruction() instanceof IINC) {
                 int incValue = ((IINC) handle.getInstruction()).getIncrement();
                 int index = ((IINC) handle.getInstruction()).getIndex();
@@ -161,7 +127,6 @@ public class ConstantFolder {
                 handle = handle.getNext();
                 instList.setPositions();
             }
->>>>>>> Stashed changes
         }
 
         instList.setPositions(true);
@@ -335,636 +300,6 @@ public class ConstantFolder {
             safeInstructionDelete(instList, lastStackOp);
             return value;
         } else if (lastStackOp.getInstruction() instanceof IADD) {
-<<<<<<< Updated upstream
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            if (firstNumber == null) {
-                return null;
-            }
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((int) firstNumber + (int) secondNumber);
-        } else if (lastStackOp.getInstruction() instanceof IMUL) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((int) firstNumber * (int) secondNumber);
-        } else if (lastStackOp.getInstruction() instanceof IDIV) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((int) secondNumber / (int) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof ISUB) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((int) secondNumber - (int) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof IREM) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((int) secondNumber % (int) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof IAND) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((int) secondNumber & (int) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof INEG) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            // delete first instruction
-            if (firstNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return (int)(0 - (int) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof IOR) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((int) secondNumber | (int) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof ISHL) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((int) secondNumber << (int) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof ISHR) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((int) secondNumber >> (int) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof IUSHR) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((int) secondNumber >>> (int) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof IXOR) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((int) secondNumber ^ (int) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof LADD) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            if (firstNumber == null) {
-                return null;
-            }
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((long) firstNumber + (long) secondNumber);
-        } else if (lastStackOp.getInstruction() instanceof LMUL) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((long) firstNumber * (long) secondNumber);
-        } else if (lastStackOp.getInstruction() instanceof LDIV) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((long) secondNumber / (long) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof LSUB) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((long) secondNumber - (long) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof LREM) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((long) secondNumber % (long) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof LNEG) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            // delete first instruction
-            if (firstNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return (long)(0 - (long) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof LOR) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((long) secondNumber | (long) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof LSHL) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((long) secondNumber << (long) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof LSHR) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((long) secondNumber >> (long) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof LUSHR) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((long) secondNumber >>> (long) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof LXOR) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((long) secondNumber ^ (long) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof FADD) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            if (firstNumber == null) {
-                return null;
-            }
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((float) firstNumber + (float) secondNumber);
-        } else if (lastStackOp.getInstruction() instanceof FMUL) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((float) firstNumber * (float) secondNumber);
-        } else if (lastStackOp.getInstruction() instanceof FDIV) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((float) secondNumber / (float) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof FSUB) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((float) secondNumber - (float) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof FREM) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((float) secondNumber % (float) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof FNEG) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            // delete first instruction
-            if (firstNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return (float)(0 - (float) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof DADD) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            if (firstNumber == null) {
-                return null;
-            }
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((double) firstNumber + (double) secondNumber);
-        } else if (lastStackOp.getInstruction() instanceof DMUL) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((double) firstNumber * (double) secondNumber);
-        } else if (lastStackOp.getInstruction() instanceof DDIV) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((double) secondNumber / (double) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof DSUB) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((double) secondNumber - (double) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof DREM) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return ((double) secondNumber % (double) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof DCMPG) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            if ((double) secondNumber == (double) firstNumber) {
-                return 0;
-            } else if ((double) secondNumber > (double) firstNumber) {
-=======
             Number[] number = binaryOps(instList, lastStackOp);
             if (number == null)
             {
@@ -1211,33 +546,11 @@ public class ConstantFolder {
             if ((double) number[1] == (double) number[0]) {
                 return 0;
             } else if ((double) number[1] > (double) number[0]) {
->>>>>>> Stashed changes
                 return 1;
             } else {
                 return -1;
             }
         } else if (lastStackOp.getInstruction() instanceof DCMPL) {
-<<<<<<< Updated upstream
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            if ((double) secondNumber == (double) firstNumber) {
-                return 0;
-            } else if ((double) secondNumber < (double) firstNumber) {
-=======
             Number[] number = binaryOps(instList, lastStackOp);
             if (number == null)
             {
@@ -1246,48 +559,10 @@ public class ConstantFolder {
             if ((double) number[1] == (double) number[0]) {
                 return 0;
             } else if ((double) number[1] < (double) number[0]) {
->>>>>>> Stashed changes
                 return 1;
             } else {
                 return -1;
             }
-<<<<<<< Updated upstream
-        } else if (lastStackOp.getInstruction() instanceof DNEG) {          InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-
-       // delete first instruction
-          if (firstNumber == null) {
-                return null;
-            }
-         safeInstructionDelete(instList, lastStackOp);
-
-            return (double)(0 - (double) firstNumber);
-
-       } else if (lastStackOp.getInstruction() instanceof LCMP) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            if ((double) secondNumber == (double) firstNumber) {
-                return 0;
-            } else if ((double) secondNumber > (double) firstNumber) {
-=======
         } else if (lastStackOp.getInstruction() instanceof DNEG) {
         	Number firstNumber = getLastStackPush(instList, lastStackOp);
         	if (firstNumber == null) {
@@ -1305,33 +580,11 @@ public class ConstantFolder {
             if ((double) number[1] == (double) number[0]) {
                 return 0;
             } else if ((double) number[1] > (double) number[0]) {
->>>>>>> Stashed changes
                 return 1;
             } else {
                 return -1;
             }
         } else if (lastStackOp.getInstruction() instanceof FCMPG) {
-<<<<<<< Updated upstream
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            if ((float) secondNumber == (float) firstNumber) {
-                return 0;
-            } else if ((float) secondNumber > (float) firstNumber) {
-=======
             Number[] number = binaryOps(instList, lastStackOp);
             if (number == null)
             {
@@ -1340,33 +593,11 @@ public class ConstantFolder {
             if ((float) number[1] == (float) number[0]) {
                 return 0;
             } else if ((float) number[1] > (float) number[0]) {
->>>>>>> Stashed changes
                 return 1;
             } else {
                 return -1;
             }
         } else if (lastStackOp.getInstruction() instanceof FCMPL) {
-<<<<<<< Updated upstream
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            instList.setPositions();
-            InstructionHandle secondInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(secondInstruction) || secondInstruction != null)) {
-                secondInstruction = secondInstruction.getPrev();
-            }
-            Number secondNumber = getLastStackPush(instList, secondInstruction.getNext());
-            // delete first instruction
-            if (firstNumber == null || secondNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            if ((float) secondNumber == (float) firstNumber) {
-                return 0;
-            } else if ((float) secondNumber < (float) firstNumber) {
-=======
             Number[] number = binaryOps(instList, lastStackOp);
             if (number == null)
             {
@@ -1375,7 +606,6 @@ public class ConstantFolder {
             if ((float) number[1] == (float) number[0]) {
                 return 0;
             } else if ((float) number[1] < (float) number[0]) {
->>>>>>> Stashed changes
                 return 1;
             } else {
                 return -1;
@@ -1392,176 +622,6 @@ public class ConstantFolder {
             Number value = (Number) ldc2_w.getValue(myCPGen);
             safeInstructionDelete(instList, lastStackOp);
             return value;
-<<<<<<< Updated upstream
-        } else if (lastStackOp.getInstruction() instanceof I2D) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            if (firstNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return (double)((int) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof D2F) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            if (firstNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return (float)((double) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof D2I) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            if (firstNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return (int)((double) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof D2L) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            if (firstNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return (long)((double) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof F2D) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            if (firstNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return (double)((float) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof F2I) {
-
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            if (firstNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return (int)((float) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof F2L) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            if (firstNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return (long)((float) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof I2B) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            if (firstNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return (byte)((int) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof I2D) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            if (firstNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return (double)((int) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof I2F) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            if (firstNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return (float)((int) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof I2L) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            if (firstNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return (long)((int) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof I2S) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            if (firstNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return (short)((int) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof L2D) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            if (firstNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return (double)((long) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof L2F) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            if (firstNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return (float)((long) firstNumber);
-        } else if (lastStackOp.getInstruction() instanceof L2I) {
-            InstructionHandle firstInstruction = lastStackOp.getPrev();
-            while (!(stackChangingOp(firstInstruction) || firstInstruction != null)) {
-                firstInstruction = firstInstruction.getPrev();
-            }
-            Number firstNumber = getLastStackPush(instList, firstInstruction.getNext());
-            if (firstNumber == null) {
-                return null;
-            }
-            safeInstructionDelete(instList, lastStackOp);
-            return (int)((long) firstNumber);
-        }
-        return null;
-=======
         } else if (lastStackOp.getInstruction() instanceof ConversionInstruction){
         	if (lastStackOp.getInstruction() instanceof I2C) { 
         		return null;
@@ -1613,7 +673,6 @@ public class ConstantFolder {
     		return (float)((long) firstNumber);
     	}
     	return null;
->>>>>>> Stashed changes
     }
 
     private Boolean stackChangingOp(InstructionHandle handle) {
@@ -1623,30 +682,6 @@ public class ConstantFolder {
         return false;
     }
 
-<<<<<<< Updated upstream
-    private void replaceINCs(InstructionList instList) {
-        for (InstructionHandle handle = instList.getStart(); handle != null; handle = handle.getNext()) {
-            if (handle.getInstruction() instanceof IINC) {
-                int incValue = ((IINC) handle.getInstruction()).getIncrement();
-                int index = ((IINC) handle.getInstruction()).getIndex();
-                instList.insert(handle, new BIPUSH((byte) incValue));
-                InstructionHandle incBipush = handle.getPrev();
-                instList.insert(handle, new ILOAD(index));
-                instList.insert(handle, new IADD());
-                instList.insert(handle, new ISTORE(index));
-                try {
-                    instList.redirectBranches(handle, incBipush);
-                    instList.delete(handle);
-                } catch (Exception e) {
-                    // do nothing
-                }
-                instList.setPositions();
-            }
-        }
-    }
-
-=======
->>>>>>> Stashed changes
     private void safeInstructionDelete(InstructionList instList, InstructionHandle nodeToDelete) {
         instList.redirectBranches(nodeToDelete, nodeToDelete.getPrev());
         try {
@@ -1685,10 +720,6 @@ public class ConstantFolder {
             e.printStackTrace();
         }
     }
-<<<<<<< Updated upstream
-}
-
-=======
 
     private Number[] binaryOps(InstructionList instList, InstructionHandle lastStackOp) {
 		Number[] number = new Number[2];
@@ -1706,4 +737,3 @@ public class ConstantFolder {
 		return number;
 	}
 }
->>>>>>> Stashed changes
