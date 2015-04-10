@@ -135,10 +135,6 @@ public class ConstantFolder {
         InstructionList newInstList = new InstructionList(newMethodCode.getCode());
         cgen.replaceMethod(method, newMethod);
 
-        for (InstructionHandle handle = newInstList.getStart(); handle != null;handle = handle.getNext()) {
-            System.out.println(handle);
-        }
-        System.out.println(" ");
     }
 
     // returns true if a computable number is being stored in the stack
