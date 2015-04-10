@@ -1,9 +1,14 @@
 #COMP2010 Coursework
 
 **Part 1 - Lexer and Parser**
- - To build, issue `make`
- - To test, issue `make test`
+ - To build and test, issue
+```sh
+$ make
+$ make test
+```
 
 **Part 2 - Folding optimisation**
- - To build, issue `ant`
- - Sit back and watch the tests
+ - To build and test, issue
+```sh
+$ ant
+```

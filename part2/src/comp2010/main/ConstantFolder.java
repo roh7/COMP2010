@@ -1,8 +1,6 @@
 // COMP2010 Coursework 2 - Folding Optimisation
 // Sam Fallahi, Rohan Kopparapu, David Lipowicz
 
-// P.S. If you are reading this code, good luck
-
 package comp2010.main;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -137,6 +135,10 @@ public class ConstantFolder {
         InstructionList newInstList = new InstructionList(newMethodCode.getCode());
         cgen.replaceMethod(method, newMethod);
 
+        for (InstructionHandle handle = newInstList.getStart(); handle != null;handle = handle.getNext()) {
+            System.out.println(handle);
+        }
+        System.out.println(" ");
     }
 
     // returns true if a computable number is being stored in the stack
@@ -161,7 +163,7 @@ public class ConstantFolder {
                         instList.insert(handleNow, new LDC(constantIndex));
                         instList.setPositions();
                         // insert the ldc we defined a few lines above
-                    } else if (value > 127 || value < -128) {
+                    } else if (value < -128 || value > 127) {
                         instList.insert(handleNow, new SIPUSH((short) value));
                         instList.setPositions();
                     } else {
@@ -301,247 +303,215 @@ public class ConstantFolder {
             return value;
         } else if (lastStackOp.getInstruction() instanceof IADD) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((int) number[0] + (int) number[1]);
         } else if (lastStackOp.getInstruction() instanceof IMUL) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((int) number[0] * (int) number[1]);
         } else if (lastStackOp.getInstruction() instanceof IDIV) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((int) number[1] / (int) number[0]);
         } else if (lastStackOp.getInstruction() instanceof ISUB) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((int) number[1] - (int) number[0]);
         } else if (lastStackOp.getInstruction() instanceof IREM) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((int) number[1] % (int) number[0]);
         } else if (lastStackOp.getInstruction() instanceof IAND) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((int) number[1] & (int) number[0]);
         } else if (lastStackOp.getInstruction() instanceof INEG) {
-        	Number firstNumber = getLastStackPush(instList, lastStackOp);
-        	if (firstNumber == null) {
-        		return null;
-        	}
-        	safeInstructionDelete(instList, lastStackOp);
+            Number firstNumber = getLastStackPush(instList, lastStackOp);
+            if (firstNumber == null) {
+                return null;
+            }
+            safeInstructionDelete(instList, lastStackOp);
             return (int)(0 - (int) firstNumber);
         } else if (lastStackOp.getInstruction() instanceof IOR) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((int) number[1] | (int) number[0]);
         } else if (lastStackOp.getInstruction() instanceof ISHL) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((int) number[1] << (int) number[0]);
         } else if (lastStackOp.getInstruction() instanceof ISHR) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((int) number[0] >> (int) number[1]);
         } else if (lastStackOp.getInstruction() instanceof IUSHR) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((int) number[1] >>> (int) number[0]);
         } else if (lastStackOp.getInstruction() instanceof IXOR) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((int) number[1] ^ (int) number[0]);
         } else if (lastStackOp.getInstruction() instanceof LADD) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((long) number[0] + (long) number[1]);
         } else if (lastStackOp.getInstruction() instanceof LMUL) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((long) number[0] * (long) number[1]);
         } else if (lastStackOp.getInstruction() instanceof LDIV) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((long) number[1] / (long) number[0]);
         } else if (lastStackOp.getInstruction() instanceof LSUB) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((long) number[1] - (long) number[0]);
         } else if (lastStackOp.getInstruction() instanceof LREM) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((long) number[1] % (long) number[0]);
         } else if (lastStackOp.getInstruction() instanceof LNEG) {
-        	Number firstNumber = getLastStackPush(instList, lastStackOp);
-        	if (firstNumber == null) {
-        		return null;
-        	}
-        	safeInstructionDelete(instList, lastStackOp);
+            Number firstNumber = getLastStackPush(instList, lastStackOp);
+            if (firstNumber == null) {
+                return null;
+            }
+            safeInstructionDelete(instList, lastStackOp);
             return (long)(0 - (long) firstNumber);
         } else if (lastStackOp.getInstruction() instanceof LOR) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((long) number[1] | (long) number[0]);
         } else if (lastStackOp.getInstruction() instanceof LSHL) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((long) number[1] << (long) number[0]);
         } else if (lastStackOp.getInstruction() instanceof LSHR) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((long) number[1] >> (long) number[0]);
         } else if (lastStackOp.getInstruction() instanceof LUSHR) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((long) number[1] >>> (long) number[0]);
         } else if (lastStackOp.getInstruction() instanceof LXOR) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((long) number[1] ^ (long) number[0]);
         } else if (lastStackOp.getInstruction() instanceof FADD) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((float) number[0] + (float) number[1]);
         } else if (lastStackOp.getInstruction() instanceof FMUL) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((float) number[0] * (float) number[1]);
         } else if (lastStackOp.getInstruction() instanceof FDIV) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((float) number[1] / (float) number[0]);
         } else if (lastStackOp.getInstruction() instanceof FSUB) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((float) number[1] - (float) number[0]);
         } else if (lastStackOp.getInstruction() instanceof FREM) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((float) number[1] % (float) number[0]);
         } else if (lastStackOp.getInstruction() instanceof FNEG) {
-        	Number firstNumber = getLastStackPush(instList, lastStackOp);
-        	if (firstNumber == null) {
-        		return null;
-        	}
-        	safeInstructionDelete(instList, lastStackOp);
+            Number firstNumber = getLastStackPush(instList, lastStackOp);
+            if (firstNumber == null) {
+                return null;
+            }
+            safeInstructionDelete(instList, lastStackOp);
             return (float)(0 - (float) firstNumber);
         } else if (lastStackOp.getInstruction() instanceof DADD) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((double) number[0] + (double) number[1]);
         } else if (lastStackOp.getInstruction() instanceof DMUL) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((double) number[0] * (double) number[1]);
         } else if (lastStackOp.getInstruction() instanceof DDIV) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((double) number[1] / (double) number[0]);
         } else if (lastStackOp.getInstruction() instanceof DSUB) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((double) number[1] - (double) number[0]);
         } else if (lastStackOp.getInstruction() instanceof DREM) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             return ((double) number[1] % (double) number[0]);
         } else if (lastStackOp.getInstruction() instanceof DCMPG) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             if ((double) number[1] == (double) number[0]) {
                 return 0;
@@ -552,9 +522,8 @@ public class ConstantFolder {
             }
         } else if (lastStackOp.getInstruction() instanceof DCMPL) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             if ((double) number[1] == (double) number[0]) {
                 return 0;
@@ -564,18 +533,17 @@ public class ConstantFolder {
                 return -1;
             }
         } else if (lastStackOp.getInstruction() instanceof DNEG) {
-        	Number firstNumber = getLastStackPush(instList, lastStackOp);
-        	if (firstNumber == null) {
-        		return null;
-        	}
-        	safeInstructionDelete(instList, lastStackOp);
+            Number firstNumber = getLastStackPush(instList, lastStackOp);
+            if (firstNumber == null) {
+                return null;
+            }
+            safeInstructionDelete(instList, lastStackOp);
             return (double)(0 - (double) firstNumber);
 
        } else if (lastStackOp.getInstruction() instanceof LCMP) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             if ((double) number[1] == (double) number[0]) {
                 return 0;
@@ -586,9 +554,8 @@ public class ConstantFolder {
             }
         } else if (lastStackOp.getInstruction() instanceof FCMPG) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             if ((float) number[1] == (float) number[0]) {
                 return 0;
@@ -599,9 +566,8 @@ public class ConstantFolder {
             }
         } else if (lastStackOp.getInstruction() instanceof FCMPL) {
             Number[] number = binaryOps(instList, lastStackOp);
-            if (number == null)
-            {
-            	return null;
+            if (number == null) {
+                return null;
             }
             if ((float) number[1] == (float) number[0]) {
                 return 0;
@@ -623,23 +589,23 @@ public class ConstantFolder {
             safeInstructionDelete(instList, lastStackOp);
             return value;
         } else if (lastStackOp.getInstruction() instanceof ConversionInstruction){
-        	if (lastStackOp.getInstruction() instanceof I2C) { 
-        		return null;
-        	}
-        	Number firstNumber = getLastStackPush(instList, lastStackOp);
-        	if (firstNumber == null) {
-        		return null;
-        	}
-        	Number convertedNum = convertNumber(lastStackOp, firstNumber);
+            if (lastStackOp.getInstruction() instanceof I2C) { 
+                return null;
+            }
+            Number firstNumber = getLastStackPush(instList, lastStackOp);
+            if (firstNumber == null) {
+                return null;
+            }
+            Number convertedNum = convertNumber(lastStackOp, firstNumber);
             safeInstructionDelete(instList, lastStackOp);
-        	return convertedNum;
+            return convertedNum;
         }
         return null;
     }
 
     private Number convertNumber(InstructionHandle lastStackOp, Number firstNumber) {
 
-    	if (lastStackOp.getInstruction() instanceof I2D) {
+        if (lastStackOp.getInstruction() instanceof I2D) {
             return (double)((int) firstNumber);
         } else if (lastStackOp.getInstruction() instanceof D2F) {
             return (float)((double) firstNumber);
@@ -668,15 +634,22 @@ public class ConstantFolder {
         } else if (lastStackOp.getInstruction() instanceof L2F) {
             return (float)((long) firstNumber);
         } else if (lastStackOp.getInstruction() instanceof L2I) {
-        	return (int)((long) firstNumber);
+            return (int)((long) firstNumber);
         } else if (lastStackOp.getInstruction() instanceof L2F) {
-    		return (float)((long) firstNumber);
-    	}
-    	return null;
+            return (float)((long) firstNumber);
+        }
+        return null;
     }
 
     private Boolean stackChangingOp(InstructionHandle handle) {
-        if (handle.getInstruction() instanceof ArithmeticInstruction && handle.getInstruction() instanceof BIPUSH && handle.getInstruction() instanceof SIPUSH && handle.getInstruction() instanceof LCONST && handle.getInstruction() instanceof DCONST && handle.getInstruction() instanceof FCONST && handle.getInstruction() instanceof ICONST && handle.getInstruction() instanceof DCMPG && handle.getInstruction() instanceof DCMPL && handle.getInstruction() instanceof FCMPG && handle.getInstruction() instanceof FCMPL && handle.getInstruction() instanceof LCMP && handle.getInstruction() instanceof LocalVariableInstruction && handle.getInstruction() instanceof StackInstruction) {
+        if (handle.getInstruction() instanceof ArithmeticInstruction || handle.getInstruction() instanceof BIPUSH ||
+              handle.getInstruction() instanceof SIPUSH || handle.getInstruction() instanceof LCONST ||
+              handle.getInstruction() instanceof DCONST || handle.getInstruction() instanceof FCONST ||
+              handle.getInstruction() instanceof ICONST || handle.getInstruction() instanceof DCMPG ||
+              handle.getInstruction() instanceof DCMPL || handle.getInstruction() instanceof FCMPG ||
+              handle.getInstruction() instanceof FCMPL || handle.getInstruction() instanceof LCMP ||
+              handle.getInstruction() instanceof LocalVariableInstruction || handle.getInstruction() instanceof StackInstruction) {
+            
             return true;
         }
         return false;
@@ -722,18 +695,16 @@ public class ConstantFolder {
     }
 
     private Number[] binaryOps(InstructionList instList, InstructionHandle lastStackOp) {
-		Number[] number = new Number[2];
-		number[0] =  getLastStackPush(instList, lastStackOp);
-		if (number[0] == null) 
-		{
-			return null;
-		}
-		number[1] =  getLastStackPush(instList, lastStackOp);
-		if (number[1] == null) 
-		{
-			return null;
-		}
-		safeInstructionDelete(instList, lastStackOp);
-		return number;
-	}
+        Number[] number = new Number[2];
+        number[0] =  getLastStackPush(instList, lastStackOp);
+        if (number[0] == null) {
+            return null;
+        }
+        number[1] =  getLastStackPush(instList, lastStackOp);
+        if (number[1] == null) {
+            return null;
+        }
+        safeInstructionDelete(instList, lastStackOp);
+        return number;
+    }
 }
